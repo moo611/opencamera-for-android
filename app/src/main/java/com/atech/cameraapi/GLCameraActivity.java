@@ -7,52 +7,124 @@ import android.graphics.Matrix;
 import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.atech.glcamera.filters.BlackFilter;
-
 import com.atech.glcamera.interfaces.FilteredBitmapCallback;
 import com.atech.glcamera.utils.FileUtils;
+import com.atech.glcamera.utils.FilterFactory;
 import com.atech.glcamera.views.GLCameraView;
 
 import java.io.File;
 import java.io.FileOutputStream;
-
+import java.util.ArrayList;
+import java.util.List;
 
 public class GLCameraActivity extends AppCompatActivity implements View.OnClickListener {
 
-
-
     ImageView imgSwitch;
-    Button btncapture;
-    Button btnRecord;
-    Button btnfilter;
+    ImageView imgMode;
+    ImageView imgFilter;
+    ImageView imgCapter;
     GLCameraView mCameraView;
+    RecyclerView rv;
 
-    private boolean mRecordingEnabled;      // controls button state
-    private int curpos = 0;
-
+    private boolean mRecordingEnabled = false;  // controls button state
+    private int mode = 1;     //1.capture 2.record
+    private List<FilterFactory.FilterType>filters = new ArrayList<>();
+    private List<FilterInfo>infos = new ArrayList<>();
+    private boolean isShowing = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_glcamera);
 
-
-        btncapture = findViewById(R.id.btn_capture);
+        imgCapter = findViewById(R.id.img_capture);
+        imgMode = findViewById(R.id.img_mode);
         imgSwitch = findViewById(R.id.img_switch);
-        btnRecord = findViewById(R.id.btn_record);
+        imgFilter = findViewById(R.id.img_filter);
         mCameraView = findViewById(R.id.glcamera);
-        btnfilter = findViewById(R.id.btn_filter);
+        rv = findViewById(R.id.rv);
 
-        btncapture.setOnClickListener(this);
+        imgMode.setOnClickListener(this);
         imgSwitch.setOnClickListener(this);
-        btnRecord.setOnClickListener(this);
-        btnfilter.setOnClickListener(this);
+        imgFilter.setOnClickListener(this);
+        imgCapter.setOnClickListener(this);
+
+        initFilters();
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        linearLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
+        FilterAdapter adapter = new FilterAdapter(this,infos);
+        rv.setAdapter(adapter);
+        rv.setLayoutManager(linearLayoutManager);
+
+        adapter.setFilterSeletedListener(new SelectedListener() {
+            @Override
+            public void onFilterSelected(int pos) {
+
+                mCameraView.updateFilter(filters.get(pos));
+
+            }
+        });
+
+        mCameraView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                if (isShowing){
+                    rv.setVisibility(View.INVISIBLE);
+                    isShowing = false;
+                }
+
+            }
+        });
+
+    }
+
+    private void initFilters(){
+
+
+        filters.add(FilterFactory.FilterType.Original);
+        filters.add(FilterFactory.FilterType.Sunrise);
+        filters.add(FilterFactory.FilterType.Sunset);
+        filters.add(FilterFactory.FilterType.BlackWhite);
+        filters.add(FilterFactory.FilterType.WhiteCat);
+        filters.add(FilterFactory.FilterType.BlackCat);
+        filters.add(FilterFactory.FilterType.SkinWhiten);
+        filters.add(FilterFactory.FilterType.Healthy);
+        filters.add(FilterFactory.FilterType.Sakura);
+        filters.add(FilterFactory.FilterType.Romance);
+        filters.add(FilterFactory.FilterType.Latte);
+        filters.add(FilterFactory.FilterType.Warm);
+        filters.add(FilterFactory.FilterType.Calm);
+        filters.add(FilterFactory.FilterType.Cool);
+        filters.add(FilterFactory.FilterType.Brooklyn);
+        filters.add(FilterFactory.FilterType.Sweets);
+
+
+        infos.add(new FilterInfo(R.drawable.filter_thumb_original,"原图"));
+        infos.add(new FilterInfo(R.drawable.filter_thumb_sunrise,"日出"));
+        infos.add(new FilterInfo(R.drawable.filter_thumb_sunset,"日落"));
+        infos.add(new FilterInfo(R.drawable.filter_thumb_1977,"黑白"));
+        infos.add(new FilterInfo(R.drawable.filter_thumb_whitecat,"白猫"));
+        infos.add(new FilterInfo(R.drawable.filter_thumb_blackcat,"黑猫"));
+        infos.add(new FilterInfo(R.drawable.filter_thumb_beauty,"美白"));
+        infos.add(new FilterInfo(R.drawable.filter_thumb_healthy,"健康"));
+        infos.add(new FilterInfo(R.drawable.filter_thumb_sakura,"樱花"));
+        infos.add(new FilterInfo(R.drawable.filter_thumb_romance,"浪漫"));
+        infos.add(new FilterInfo(R.drawable.filter_thumb_latte,"拿铁"));
+        infos.add(new FilterInfo(R.drawable.filter_thumb_warm,"温暖"));
+        infos.add(new FilterInfo(R.drawable.filter_thumb_calm,"安静"));
+        infos.add(new FilterInfo(R.drawable.filter_thumb_cool,"寒冷"));
+        infos.add(new FilterInfo(R.drawable.filter_thumb_brooklyn,"纽约"));
+        infos.add(new FilterInfo(R.drawable.filter_thumb_sweets,"甜蜜"));
+
     }
 
     @Override
@@ -68,32 +140,43 @@ public class GLCameraActivity extends AppCompatActivity implements View.OnClickL
 
                 break;
 
-            case R.id.btn_capture:
+            case R.id.img_mode:
 
-                onCapture();
+                if (mode==1){
+                    mode=2;
+                    Toast.makeText(GLCameraActivity.this,"处于录像模式",Toast.LENGTH_SHORT).show();
 
-                break;
-
-            case R.id.btn_record:
-
-                onRecord();
-
-                break;
-
-
-            case R.id.btn_filter:
-
-                if (curpos==0){
-
-                    curpos = 1;
-                    btnfilter.setText("原生");
-
-                }else{
-                    curpos = 0;
-                    btnfilter.setText("黑白");
+                }else {
+                    mode = 1;
+                    Toast.makeText(GLCameraActivity.this,"处于拍照模式",Toast.LENGTH_SHORT).show();
                 }
-                mCameraView.updateFilter(curpos);
+                break;
 
+            case R.id.img_filter:
+
+
+                if (isShowing){
+
+                    rv.setVisibility(View.INVISIBLE);
+
+                }else {
+
+                    rv.setVisibility(View.VISIBLE);
+                }
+                isShowing = !isShowing;
+
+                break;
+
+            case R.id.img_capture:
+
+                if (mode==1){
+
+                    onCapture();
+
+                }else {
+
+                    onRecord();
+                }
 
                 break;
 
@@ -149,13 +232,10 @@ public class GLCameraActivity extends AppCompatActivity implements View.OnClickL
 
        if (mRecordingEnabled){
 
-           btnRecord.setText("结束录制");
-
            Toast.makeText(GLCameraActivity.this,"start",Toast.LENGTH_SHORT).show();
 
        }else{
 
-           btnRecord.setText("开始录制");
            Toast.makeText(GLCameraActivity.this,"finished",Toast.LENGTH_SHORT).show();
 
        }

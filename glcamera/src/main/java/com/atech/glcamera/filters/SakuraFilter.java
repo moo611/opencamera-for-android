@@ -1,29 +1,24 @@
 package com.atech.glcamera.filters;
 
 import android.content.Context;
-import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
-
 import com.atech.glcamera.R;
-import com.atech.glcamera.utils.OpenGlUtils;
-
 import java.nio.ByteBuffer;
 
-public class MagicSakuraFilter extends BaseFilter{
+public class SakuraFilter extends BaseFilter{
 
 	private int[] mToneCurveTexture = {-1};
 	private int mToneCurveTextureUniformLocation;
-	private int mTexelHeightUniformLocation;
-	private int mTexelWidthUniformLocation;
 
-	public MagicSakuraFilter(Context c) {
+
+	public SakuraFilter(Context c) {
 		super(c);
 	}
 	@Override
 	public void setPath() {
 
 		path1 = R.raw.base_vertex_shader;
-		path2 = R.raw.sakura;
+		path2 = R.raw.romance;
 
 	}
 
@@ -31,8 +26,7 @@ public class MagicSakuraFilter extends BaseFilter{
 	public void createProgram() {
 		super.createProgram();
 		mToneCurveTextureUniformLocation = GLES20.glGetUniformLocation(mProgram, "curve");
-		mTexelWidthUniformLocation = GLES20.glGetUniformLocation(mProgram, "texelWidthOffset");
-		mTexelHeightUniformLocation = GLES20.glGetUniformLocation(mProgram, "texelHeightOffset");
+
 
 		GLES20.glGenTextures(1, mToneCurveTexture, 0);
 		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mToneCurveTexture[0]);
@@ -58,42 +52,7 @@ public class MagicSakuraFilter extends BaseFilter{
 	}
 
 	@Override
-	public void draw(int textureId, float[] metrix) {
-
-
-		GLES20.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-		GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
-
-		GLES20.glUseProgram(mProgram);
-		vertexBuffer.position(0);
-		GLES20.glVertexAttribPointer(mGLAttribPosition, 2, GLES20.GL_FLOAT, false, 0, vertexBuffer);
-		GLES20.glEnableVertexAttribArray(mGLAttribPosition);
-		textureBuffer.position(0);
-		GLES20.glVertexAttribPointer(mGLAttribTextureCoordinate, 2, GLES20.GL_FLOAT, false, 0, textureBuffer);
-		GLES20.glEnableVertexAttribArray(mGLAttribTextureCoordinate);
-
-		if (textureId != OpenGlUtils.NO_TEXTURE) {
-			GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-			GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, textureId);
-			GLES20.glUniform1i(mGLUniformTexture, 0);
-		}
-
-
-		int mHMatrix = GLES20.glGetUniformLocation(mProgram, "uTextureMatrix");
-		GLES20.glUniformMatrix4fv(mHMatrix, 1, false, metrix, 0);
-
-		onDrawArraysPre();
-		GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
-		GLES20.glDisableVertexAttribArray(mGLAttribPosition);
-		GLES20.glDisableVertexAttribArray(mGLAttribTextureCoordinate);
-		onDrawArraysAfter();
-		GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, 0);
-		GLES20.glUseProgram(0);
-
-
-	}
-
-	protected void onDrawArraysAfter(){
+	public void onDrawArraysAfter(){
 		if (mToneCurveTexture[0] != -1){
 			GLES20.glActiveTexture(GLES20.GL_TEXTURE3);
 			GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
@@ -101,7 +60,8 @@ public class MagicSakuraFilter extends BaseFilter{
 		}
 	}
 
-	protected void onDrawArraysPre(){
+	@Override
+	public void onDrawArraysPre(){
 		if (mToneCurveTexture[0] != -1){
 			GLES20.glActiveTexture(GLES20.GL_TEXTURE3);
 			GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mToneCurveTexture[0]);
@@ -117,10 +77,5 @@ public class MagicSakuraFilter extends BaseFilter{
 		mToneCurveTexture[0] = -1;
 	}
 
-    @Override
-	public void onInputSizeChanged(int width, int height) {
 
-        GLES20.glUniform1f(mTexelWidthUniformLocation, (1.0f / (float)width));
-        GLES20.glUniform1f(mTexelHeightUniformLocation, (1.0f / (float)height));
-    }
 }

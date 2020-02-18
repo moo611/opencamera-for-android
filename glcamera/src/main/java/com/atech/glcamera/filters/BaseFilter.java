@@ -7,6 +7,7 @@ import android.util.Log;
 
 import com.atech.glcamera.R;
 import com.atech.glcamera.grafika.gles.GlUtil;
+import com.atech.glcamera.utils.OpenGlUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -119,7 +120,71 @@ public abstract class BaseFilter {
      * 开始绘制
      */
 
-    public abstract void draw(int textureId,float[]metrix);
+    public void draw(int textureId,float[]metrix){
+
+        GLES20.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
+
+        GLES20.glUseProgram(mProgram);
+        vertexBuffer.position(0);
+        GLES20.glVertexAttribPointer(mGLAttribPosition, 2, GLES20.GL_FLOAT, false, 0, vertexBuffer);
+        GLES20.glEnableVertexAttribArray(mGLAttribPosition);
+        textureBuffer.position(0);
+        GLES20.glVertexAttribPointer(mGLAttribTextureCoordinate, 2, GLES20.GL_FLOAT, false, 0, textureBuffer);
+        GLES20.glEnableVertexAttribArray(mGLAttribTextureCoordinate);
+
+        if (textureId != OpenGlUtils.NO_TEXTURE) {
+            GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+            GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, textureId);
+            GLES20.glUniform1i(mGLUniformTexture, 0);
+        }
+
+
+        int mHMatrix = GLES20.glGetUniformLocation(mProgram, "uTextureMatrix");
+        GLES20.glUniformMatrix4fv(mHMatrix, 1, false, metrix, 0);
+
+        onDrawArraysPre();
+        GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
+        GLES20.glDisableVertexAttribArray(mGLAttribPosition);
+        GLES20.glDisableVertexAttribArray(mGLAttribTextureCoordinate);
+        onDrawArraysAfter();
+        GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, 0);
+        GLES20.glUseProgram(0);
+
+    };
+
+
+    protected abstract void onDrawArraysPre();
+    protected abstract void onDrawArraysAfter();
+
+    public void releaseProgram(){
+
+        Log.v("aaaaa", "deleting program " + mProgram);
+        GLES20.glDeleteProgram(mProgram);
+        mProgram = 0;
+
+    }
+
+    protected void setFloat(final int location, final float floatValue) {
+
+        GLES20.glUniform1f(location, floatValue);
+
+    }
+
+    protected void setFloatVec2(final int location, final float[] arrayValue) {
+
+        GLES20.glUniform2fv(location, 1, FloatBuffer.wrap(arrayValue));
+
+    }
+
+
+    protected void setInteger(final int location, final int intValue) {
+        GLES20.glUniform1i(location, intValue);
+    }
+
+    public void onInputSizeChanged(final int width, final int height){
+
+    }
 
     private int loadShader(int type, String shaderCode) {
 
@@ -160,7 +225,6 @@ public abstract class BaseFilter {
         return sb.toString();
 
     }
-
     /**
      * 绑定纹理
      *
@@ -185,28 +249,5 @@ public abstract class BaseFilter {
         return texture[0];
     }
 
-    public void releaseProgram(){
-
-        Log.v("aaaaa", "deleting program " + mProgram);
-        GLES20.glDeleteProgram(mProgram);
-        mProgram = 0;
-
-    }
-
-    protected void setFloat(final int location, final float floatValue) {
-
-        GLES20.glUniform1f(location, floatValue);
-
-    }
-
-    protected void setFloatVec2(final int location, final float[] arrayValue) {
-
-        GLES20.glUniform2fv(location, 1, FloatBuffer.wrap(arrayValue));
-
-    }
-
-    public void onInputSizeChanged(final int width, final int height){
-
-    }
 
 }

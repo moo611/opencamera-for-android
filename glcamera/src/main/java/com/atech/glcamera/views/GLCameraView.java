@@ -15,17 +15,12 @@ import android.view.SurfaceHolder;
 
 import com.atech.glcamera.camera.CameraCore;
 import com.atech.glcamera.filters.BaseFilter;
-import com.atech.glcamera.filters.BeautyFilter;
-import com.atech.glcamera.filters.BlackCatFilter;
-import com.atech.glcamera.filters.BlackFilter;
-import com.atech.glcamera.filters.HealthyFilter;
-import com.atech.glcamera.filters.MagicRomanceFilter;
-import com.atech.glcamera.filters.MagicSakuraFilter;
-import com.atech.glcamera.filters.OriginalFilter;
+
 import com.atech.glcamera.gpuimage.GPUImageNativeLibrary;
 import com.atech.glcamera.grafika.TextureMovieEncoder;
 import com.atech.glcamera.interfaces.FilteredBitmapCallback;
 import com.atech.glcamera.utils.FileUtils;
+import com.atech.glcamera.utils.FilterFactory;
 
 import java.io.File;
 import java.util.LinkedList;
@@ -42,7 +37,7 @@ import javax.microedition.khronos.opengles.GL10;
 
 public class GLCameraView extends GLSurfaceView {
 
-    private BaseFilter mCurrentFilter;
+    private  BaseFilter mCurrentFilter;
     public GLRenderer renderer;
     private CameraCore mCameraHelper;
     private static final String TAG = "aaaaa";
@@ -50,9 +45,9 @@ public class GLCameraView extends GLSurfaceView {
     private int mTextureId;
     private SurfaceTexture mSurfaceTexture;
     private float[] mSTMatrix = new float[16];
-    private int oldpos = 0;
     private boolean mRecordingEnabled;
     private TextureMovieEncoder mVideoEncoder;
+    private  FilterFactory.FilterType type;
 
     public GLCameraView(Context context) {
         super(context);
@@ -73,13 +68,12 @@ public class GLCameraView extends GLSurfaceView {
 
         setEGLContextClientVersion(2);
 
-        renderer = new GLRenderer(this,new MagicSakuraFilter(c));
+        type = FilterFactory.FilterType.Original;
+        renderer = new GLRenderer(this,type);
         setRenderer(renderer);
         setRenderMode(RENDERMODE_WHEN_DIRTY);
 
-
     }
-
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
@@ -106,7 +100,8 @@ public class GLCameraView extends GLSurfaceView {
         private final Queue<Runnable> runOnDraw;
         private final Queue<Runnable> runOnDrawEnd;
 
-        public GLRenderer(GLSurfaceView surfaceView,BaseFilter filter) {
+
+        public GLRenderer(GLSurfaceView surfaceView, FilterFactory.FilterType type) {
 
             this.surfaceView = surfaceView;
             mVideoEncoder = new TextureMovieEncoder(c);
@@ -114,7 +109,7 @@ public class GLCameraView extends GLSurfaceView {
             mRecordingStatus = -1;
             mRecordingEnabled = false;
             mCameraHelper = new CameraCore(surfaceView);
-            mCurrentFilter = filter;
+            mCurrentFilter = FilterFactory.createFilter(c,type);
 
             runOnDraw = new LinkedList<>();
             runOnDrawEnd = new LinkedList<>();
@@ -129,7 +124,6 @@ public class GLCameraView extends GLSurfaceView {
 
             mCameraHelper.openCamera(Camera.CameraInfo.CAMERA_FACING_BACK);
             mCurrentFilter.createProgram();
-            mCurrentFilter.onInputSizeChanged(mCameraHelper.fitHeight,mCameraHelper.fitWidth);
             mRecordingEnabled = mVideoEncoder.isRecording();
             if (mRecordingEnabled) {
                 mRecordingStatus = RECORDING_RESUMED;
@@ -148,9 +142,8 @@ public class GLCameraView extends GLSurfaceView {
         public void onSurfaceChanged(GL10 gl, int width, int height) {
 
             Log.v("aaaaa","on size changed");
-
             GLES20.glViewport(0, 0, width, height);
-
+            mCurrentFilter.onInputSizeChanged(width,height);
 
         }
 
@@ -165,9 +158,15 @@ public class GLCameraView extends GLSurfaceView {
                     case RECORDING_OFF:
                         Log.d(TAG, "START recording");
                         // start recording
-                        Log.v("aaaaa","value:"+mCameraHelper.fitWidth+"//"+mCameraHelper.fitHeight);
+
+                        mVideoEncoder.updateFilter(type);
                         mVideoEncoder.startRecording(new TextureMovieEncoder.EncoderConfig(
-                                mOutputFile, mCameraHelper.fitHeight, mCameraHelper.fitWidth, 1000000, EGL14.eglGetCurrentContext()));
+                                mOutputFile,
+                                mCameraHelper.fitHeight,
+                                mCameraHelper.fitWidth,
+                                1000000,
+                                EGL14.eglGetCurrentContext()));
+
                         mRecordingStatus = RECORDING_ON;
                         break;
                     case RECORDING_RESUMED:
@@ -221,6 +220,7 @@ public class GLCameraView extends GLSurfaceView {
 
             mSurfaceTexture.getTransformMatrix(mSTMatrix);
 
+           // mCurrentFilter.onInputSizeChanged(mCameraHelper.fitHeight,mCameraHelper.fitWidth);
             mCurrentFilter.draw(mTextureId,mSTMatrix);
 
             runAll(runOnDrawEnd);
@@ -234,24 +234,24 @@ public class GLCameraView extends GLSurfaceView {
 
         }
 
-        private void runAll(Queue<Runnable> queue) {
-            synchronized (queue) {
-                while (!queue.isEmpty()) {
-                    queue.poll().run();
-                }
-            }
-        }
 
-
-        protected void runOnDraw(final Runnable runnable) {
+        void runOnDraw(final Runnable runnable) {
             synchronized (runOnDraw) {
                 runOnDraw.add(runnable);
             }
         }
 
-        protected void runOnDrawEnd(final Runnable runnable) {
+        void runOnDrawEnd(final Runnable runnable) {
             synchronized (runOnDrawEnd) {
                 runOnDrawEnd.add(runnable);
+            }
+        }
+
+        private void runAll(Queue<Runnable> queue) {
+            synchronized (queue) {
+                while (!queue.isEmpty()) {
+                    queue.poll().run();
+                }
             }
         }
 
@@ -287,35 +287,29 @@ public class GLCameraView extends GLSurfaceView {
 
     }
 
-    public void updateFilter(final int pos){
+    public void updateFilter(final FilterFactory.FilterType type){
 
-        if (pos==oldpos){
-            return;
-        }
+        this.type = type;
 
         renderer.runOnDraw(new Runnable() {
             @Override
             public void run() {
 
-                mCurrentFilter.releaseProgram();
-                mCurrentFilter = null;
-                Log.v("aaaaa","updateFilter:"+Thread.currentThread());
-                 //调整预览画面
-                if (pos==0){
-                    mCurrentFilter = new OriginalFilter(c);
-                }else{
-                    mCurrentFilter = new BlackFilter(c);
-                }
 
-                  mCurrentFilter.createProgram();
-                  mCurrentFilter.onInputSizeChanged(mCameraHelper.fitHeight,mCameraHelper.fitWidth);
+                mCurrentFilter.releaseProgram();
+                mCurrentFilter = FilterFactory.createFilter(c,type);
+
+                 //调整预览画面
+                mCurrentFilter.createProgram();
+                mCurrentFilter.onInputSizeChanged(getWidth(),getHeight());
                 //调整录像画面
-                mVideoEncoder.setType(pos);
+                mVideoEncoder.updateFilter(type);
+
+                Log.v("aaaaa","updateFilter:"+Thread.currentThread());
 
             }
         });
 
-        oldpos = pos;
 
     }
 
@@ -347,19 +341,8 @@ public class GLCameraView extends GLSurfaceView {
         });
 
 
-        queueEvent(new Runnable() {
-            @Override
-            public void run() {
-
-
-                Log.v("aaaaa","curent thread is:"+Thread.currentThread().getName());
-
-            }
-        });
-
         requestRender();
         waiter.acquire();
-
         return resultBitmap;
     }
 

@@ -24,13 +24,12 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
-
-
 import com.atech.glcamera.filters.BaseFilter;
-import com.atech.glcamera.filters.BlackFilter;
-import com.atech.glcamera.filters.OriginalFilter;
+import com.atech.glcamera.filters.BlackCatFilter;
 import com.atech.glcamera.grafika.gles.EglCore;
 import com.atech.glcamera.grafika.gles.WindowSurface;
+import com.atech.glcamera.utils.FilterFactory;
+
 import java.io.File;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
@@ -77,18 +76,21 @@ public class TextureMovieEncoder implements Runnable {
     private WindowSurface mInputWindowSurface;
     private EglCore mEglCore;
     private BaseFilter mFullScreen;
+    private FilterFactory.FilterType type = FilterFactory.FilterType.Original;
     private int mTextureId;
     private int mFrameNum;
     private VideoEncoderCore mVideoEncoder;
 
     // ----- accessed by multiple threads -----
-    private volatile EncoderHandler mHandler;
+    public volatile EncoderHandler mHandler;
 
     private Object mReadyFence = new Object();      // guards ready/running
     private boolean mReady;
     private boolean mRunning;
     private Context c;
 
+    private static int mWidth;
+    private static int mHeight;
 
     public TextureMovieEncoder(Context c){
 
@@ -108,8 +110,7 @@ public class TextureMovieEncoder implements Runnable {
      */
     public static class EncoderConfig {
         final File mOutputFile;
-        final int mWidth;
-        final int mHeight;
+
         final int mBitRate;
         final EGLContext mEglContext;
 
@@ -268,7 +269,6 @@ public class TextureMovieEncoder implements Runnable {
         }
     }
 
-
     /**
      * Handles encoder state change requests.  The handler is created on the encoder thread.
      */
@@ -311,6 +311,8 @@ public class TextureMovieEncoder implements Runnable {
                 case MSG_QUIT:
                     Looper.myLooper().quit();
                     break;
+
+
                 default:
                     throw new RuntimeException("Unhandled msg what=" + what);
             }
@@ -323,7 +325,7 @@ public class TextureMovieEncoder implements Runnable {
     private void handleStartRecording(EncoderConfig config) {
         Log.d(TAG, "handleStartRecording " + config);
         mFrameNum = 0;
-        prepareEncoder(config.mEglContext, config.mWidth, config.mHeight, config.mBitRate,
+        prepareEncoder(config.mEglContext, mWidth, mHeight, config.mBitRate,
                 config.mOutputFile);
     }
 
@@ -340,8 +342,6 @@ public class TextureMovieEncoder implements Runnable {
         if (VERBOSE) Log.d(TAG, "handleFrameAvailable tr=" + transform);
         mVideoEncoder.drainEncoder(false);
         mFullScreen.draw(mTextureId, transform);
-//
-//        drawBox(mFrameNum++);
 
         mInputWindowSurface.setPresentationTime(timestampNanos);
         mInputWindowSurface.swapBuffers();
@@ -386,19 +386,9 @@ public class TextureMovieEncoder implements Runnable {
         mInputWindowSurface.makeCurrent();
 
         // Create new programs and such for the new context.
-       // mFullScreen = new OriginalFilter(new ProgramHolder(c));
-        if (type==0){
-
-            mFullScreen = new OriginalFilter(c);
-
-
-        }else{
-            mFullScreen = new BlackFilter(c);
-        }
-
+        mFullScreen = FilterFactory.createFilter(c,type);
         mFullScreen.createProgram();
-
-
+        mFullScreen.onInputSizeChanged(mWidth,mHeight);
     }
 
     private void prepareEncoder(EGLContext sharedContext, int width, int height, int bitRate,
@@ -412,15 +402,9 @@ public class TextureMovieEncoder implements Runnable {
         mInputWindowSurface = new WindowSurface(mEglCore, mVideoEncoder.getInputSurface(), true);
         mInputWindowSurface.makeCurrent();
 
-        if (type==0){
-
-            mFullScreen = new OriginalFilter(c);
-        }else{
-            mFullScreen = new BlackFilter(c);
-        }
-
+        mFullScreen = FilterFactory.createFilter(c,type);
         mFullScreen.createProgram();
-        mFullScreen.onInputSizeChanged(width, height);
+        mFullScreen.onInputSizeChanged(width,height);
         Log.v("aaaaa","prepareEncoder:"+Thread.currentThread());
     }
 
@@ -440,26 +424,11 @@ public class TextureMovieEncoder implements Runnable {
         }
     }
 
-    /**
-     * Draws a box, with position offset.
-     */
-    private void drawBox(int posn) {
-        final int width = mInputWindowSurface.getWidth();
-        int xpos = (posn * 4) % (width - 50);
-        GLES20.glEnable(GLES20.GL_SCISSOR_TEST);
-        GLES20.glScissor(xpos, 0, 100, 100);
-        GLES20.glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
-        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
-        GLES20.glDisable(GLES20.GL_SCISSOR_TEST);
-    }
 
-    /**
-     * 后加的方法
-     */
-    private int type;
-    public void setType(int type){
+    public void updateFilter(FilterFactory.FilterType type){
 
         this.type = type;
+
     }
 
 }
