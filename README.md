@@ -80,6 +80,7 @@ private List<FilterFactory.FilterType>filters = new ArrayList<>();
 
 
 # 项目比较
+### 在这里首先向前辈们致敬！只是晚辈在使用上述框架的过程中出现了很多问题，因此才想做一个更加完善的解决方案。如果大家在使用过程中有什么问题，或者有什么好的建议，欢迎留言。喜欢的麻烦点个赞，谢谢。
 #### google/grafika 
 https://github.com/google/grafika
 #### android gpuimage
@@ -89,8 +90,8 @@ https://github.com/wuhaoyu1990/MagicCamera
 
 |       | 多种滤镜  | 拍照  | 录制视频  |  是否维护  |
 |------| ------------ | ------------ | ------------ | ------------ |
-|grafika|   X X  |  √ | X |
+|grafika|   X |X  |  √ | X |
 | gpuimage | √ | √ | X |X|
 |magiccamera| √  |  X | X  |X|
 |opencamera|  √ | √   | √   |√ |
-#### 在这里首先向前辈们致敬！只是晚辈在使用上述框架的过程中出现了很多问题，因此才想做一个更加完善的解决方案。如果大家在使用过程中有什么问题，或者有什么好的建议，欢迎留言。喜欢的麻烦点个赞，谢谢。
+
