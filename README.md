@@ -13,6 +13,12 @@
 # 使用
 #### 集成项目
 ```
+allprojects {
+    repositories {
+        ...
+        maven { url 'https://www.jitpack.io' }
+    }
+}
 dependencies 
         {
 	  implementation 'com.github.moo611:OpenCamera:1.0.1'
