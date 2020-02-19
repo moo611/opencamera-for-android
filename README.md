@@ -21,7 +21,7 @@ allprojects {
 }
 dependencies 
         {
-	  implementation 'com.github.moo611:OpenCamera:1.0.1'
+	  implementation 'com.github.moo611:OpenCamera:1.0.2'
 	}
 ```
 #### xml布局文件
