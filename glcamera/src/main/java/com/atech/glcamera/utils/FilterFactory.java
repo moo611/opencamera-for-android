@@ -10,6 +10,9 @@ import com.atech.glcamera.filters.BrooklynFilter;
 import com.atech.glcamera.filters.CalmFilter;
 import com.atech.glcamera.filters.CoolFilter;
 import com.atech.glcamera.filters.LatteFilter;
+import com.atech.glcamera.filters.AmaroFilter;
+import com.atech.glcamera.filters.AntiqueFilter;
+import com.atech.glcamera.filters.BrannanFilter;
 import com.atech.glcamera.filters.SweetsFilter;
 import com.atech.glcamera.filters.WarmFilter;
 import com.atech.glcamera.filters.RomanceFilter;
@@ -39,7 +42,10 @@ public class FilterFactory {
         Calm,
         Brooklyn,
         Cool,
-        Sweets
+        Sweets,
+        Amaro,
+        Antique,
+        Brannan
     }
 
     public static BaseFilter createFilter(Context c, FilterType filterType) {
@@ -132,6 +138,21 @@ public class FilterFactory {
             case Brooklyn:
 
                 baseFilter = new BrooklynFilter(c);
+
+                break;
+            case Amaro:
+
+                baseFilter = new AmaroFilter(c);
+                break;
+
+            case Antique:
+
+                baseFilter = new AntiqueFilter(c);
+
+                break;
+            case Brannan:
+
+                baseFilter = new BrannanFilter(c);
 
                 break;
         }

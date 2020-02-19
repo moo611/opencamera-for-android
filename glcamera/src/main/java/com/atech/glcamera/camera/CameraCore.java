@@ -53,6 +53,11 @@ public class CameraCore {
 
             Camera.Parameters parameters = mCamera.getParameters();
 
+            if (parameters.getSupportedFocusModes().contains(
+                    Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
+                parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
+            }
+
             //1.设置预览尺寸，防止预览画面变形
             List<Camera.Size> sizes1 = parameters.getSupportedPreviewSizes(); //得到的比例，宽是大头
             int[] result1 = getOptimalSize(sizes1, surfaceView.getWidth(), surfaceView.getHeight());

@@ -35,6 +35,7 @@ public class SweetsFilter extends BaseFilter{
 		mToneCurveTextureUniformLocation = GLES20.glGetUniformLocation(mProgram, "curve");
 		mMaskGrey1UniformLocation = GLES20.glGetUniformLocation(mProgram, "grey1Frame");
 		mLowPerformanceUniformLocation = GLES20.glGetUniformLocation(mProgram, "lowPerformance");
+
 		setInteger(mLowPerformanceUniformLocation, 1);
 
 		GLES20.glGenTextures(1, mToneCurveTexture, 0);
@@ -62,6 +63,7 @@ public class SweetsFilter extends BaseFilter{
 
 	@Override
 	public void onDrawArraysPre(){
+
 		if (mToneCurveTexture[0] != -1){
 			GLES20.glActiveTexture(GLES20.GL_TEXTURE3);
 			GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mToneCurveTexture[0]);
@@ -90,11 +92,10 @@ public class SweetsFilter extends BaseFilter{
 	}
 
 
+
 	@Override
 	public void releaseProgram() {
 		super.releaseProgram();
-
-
 		GLES20.glDeleteTextures(2, new int[]{mToneCurveTexture[0], mMaskGrey1TextureId}, 0);
 		mToneCurveTexture[0] = -1;
 		mMaskGrey1TextureId = -1;

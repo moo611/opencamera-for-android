@@ -16,6 +16,7 @@ import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
+import java.util.LinkedList;
 
 public abstract class BaseFilter {
 
@@ -45,8 +46,6 @@ public abstract class BaseFilter {
     public FloatBuffer textureBuffer;
     public int path1;
     public int path2;
-
-
     protected int mGLAttribPosition;
     protected int mGLUniformTexture;
     protected int mGLAttribTextureCoordinate;
@@ -58,6 +57,7 @@ public abstract class BaseFilter {
         vertexBuffer = createBuffer(squareCoords);
         textureBuffer = createBuffer(textureVertices);
         setPath();
+        mRunOnDraw = new LinkedList<>();
     }
 
     public abstract void setPath();
@@ -80,28 +80,13 @@ public abstract class BaseFilter {
 
         String vertexShaderCode = readRawTextFile(c, path1);
         String fragmentShaderCode = readRawTextFile(c, path2);
-
         int vertexShader = loadShader(GLES20.GL_VERTEX_SHADER, vertexShaderCode);
-        if(vertexShader == 0)
-        {
-            Log.e("ES20_ERROR", "加载顶点着色器失败");
-            return;
-        }
         int fragmentShader = loadShader(GLES20.GL_FRAGMENT_SHADER, fragmentShaderCode);
-
-        if(fragmentShader == 0)
-        {
-            Log.e("ES20_ERROR", "加载顶点着色器失败");
-            return ;
-        }
-
         mProgram = GLES20.glCreateProgram();             // create empty OpenGL ES Program
         GLES20.glAttachShader(mProgram, vertexShader);   // add the vertex shader to program
-        GlUtil.checkGlError("glAttachShader1");
         GLES20.glAttachShader(mProgram, fragmentShader); // add the fragment shader to program
-        GlUtil.checkGlError("glAttachShader2");
         GLES20.glLinkProgram(mProgram);                  // creates OpenGL ES program executables
-        GlUtil.checkGlError("glLinkProgram");
+
         if (mProgram == 0) {
             throw new RuntimeException("Unable to create program");
         }
@@ -122,10 +107,13 @@ public abstract class BaseFilter {
 
     public void draw(int textureId,float[]metrix){
 
-        GLES20.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+        GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
         GLES20.glUseProgram(mProgram);
+        runPendingOnDrawTasks();
+
+
         vertexBuffer.position(0);
         GLES20.glVertexAttribPointer(mGLAttribPosition, 2, GLES20.GL_FLOAT, false, 0, vertexBuffer);
         GLES20.glEnableVertexAttribArray(mGLAttribPosition);
@@ -165,21 +153,48 @@ public abstract class BaseFilter {
 
     }
 
+    /**
+     * 注意此处一定要用runondraw,因为要在useprogram之后执行。别问为什么，你把它去掉看好不好使就完了...
+     * @param location
+     * @param floatValue
+     */
+
     protected void setFloat(final int location, final float floatValue) {
 
-        GLES20.glUniform1f(location, floatValue);
+        runOnDraw(new Runnable() {
+            @Override
+            public void run() {
+
+                GLES20.glUniform1f(location, floatValue);
+            }
+        });
+
 
     }
 
     protected void setFloatVec2(final int location, final float[] arrayValue) {
 
-        GLES20.glUniform2fv(location, 1, FloatBuffer.wrap(arrayValue));
+        runOnDraw(new Runnable() {
+            @Override
+            public void run() {
+                GLES20.glUniform2fv(location, 1, FloatBuffer.wrap(arrayValue));
+            }
+        });
+
+
 
     }
 
 
     protected void setInteger(final int location, final int intValue) {
-        GLES20.glUniform1i(location, intValue);
+
+        runOnDraw(new Runnable() {
+            @Override
+            public void run() {
+                GLES20.glUniform1i(location, intValue);
+            }
+        });
+
     }
 
     public void onInputSizeChanged(final int width, final int height){
@@ -188,8 +203,6 @@ public abstract class BaseFilter {
 
     private int loadShader(int type, String shaderCode) {
 
-        // create a vertex shader type (GLES20.GL_VERTEX_SHADER)
-        // or a fragment shader type (GLES20.GL_FRAGMENT_SHADER)
         int shader = GLES20.glCreateShader(type);
 
         // add the source code to the shader and compile it
@@ -249,5 +262,16 @@ public abstract class BaseFilter {
         return texture[0];
     }
 
+    private final LinkedList<Runnable> mRunOnDraw;
 
+    protected void runPendingOnDrawTasks() {
+        while (!mRunOnDraw.isEmpty()) {
+            mRunOnDraw.removeFirst().run();
+        }
+    }
+    protected void runOnDraw(final Runnable runnable) {
+        synchronized (mRunOnDraw) {
+            mRunOnDraw.addLast(runnable);
+        }
+    }
 }

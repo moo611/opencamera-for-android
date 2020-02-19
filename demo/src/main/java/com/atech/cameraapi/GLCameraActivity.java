@@ -106,6 +106,9 @@ public class GLCameraActivity extends AppCompatActivity implements View.OnClickL
         filters.add(FilterFactory.FilterType.Cool);
         filters.add(FilterFactory.FilterType.Brooklyn);
         filters.add(FilterFactory.FilterType.Sweets);
+        filters.add(FilterFactory.FilterType.Amaro);
+        filters.add(FilterFactory.FilterType.Antique);
+        filters.add(FilterFactory.FilterType.Brannan);
 
 
         infos.add(new FilterInfo(R.drawable.filter_thumb_original,"原图"));
@@ -123,7 +126,10 @@ public class GLCameraActivity extends AppCompatActivity implements View.OnClickL
         infos.add(new FilterInfo(R.drawable.filter_thumb_calm,"安静"));
         infos.add(new FilterInfo(R.drawable.filter_thumb_cool,"寒冷"));
         infos.add(new FilterInfo(R.drawable.filter_thumb_brooklyn,"纽约"));
-        infos.add(new FilterInfo(R.drawable.filter_thumb_sweets,"甜蜜"));
+        infos.add(new FilterInfo(R.drawable.filter_thumb_sweets,"甜品"));
+        infos.add(new FilterInfo(R.drawable.filter_thumb_amoro,"Amaro"));
+        infos.add(new FilterInfo(R.drawable.filter_thumb_antique,"复古"));
+        infos.add(new FilterInfo(R.drawable.filter_thumb_brannan,"Brannan"));
 
     }
 
