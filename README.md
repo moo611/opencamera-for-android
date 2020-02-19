@@ -3,7 +3,6 @@
 
 # 效果图
 ![实时滤镜](https://github.com/moo611/OpenCamera/blob/master/images/tu1.jpg "实时滤镜")
-![](https://github.com/moo611/OpenCamera/blob/master/images/tu2.jpg)
 ![生成mp4](https://github.com/moo611/OpenCamera/blob/master/images/tu3.gif "生成mp4")
 
 # 功能
@@ -14,8 +13,9 @@
 # 使用
 #### 集成项目
 ```
-dependencies {
-	        implementation 'com.github.moo611:OpenCamera:1.0.1'
+dependencies 
+        {
+	  implementation 'com.github.moo611:OpenCamera:1.0.1'
 	}
 ```
 #### xml布局文件
@@ -89,8 +89,8 @@ https://github.com/wuhaoyu1990/MagicCamera
 
 |       | 多种滤镜  | 拍照  | 录制视频  |  是否维护  |
 |------| ------------ | ------------ | ------------ | ------------ |
-|grafika|   √| X  |  √ | X |
+|grafika|   X X  |  √ | X |
 | gpuimage | √ | √ | X |X|
 |magiccamera| √  |  X | X  |X|
 |opencamera|  √ | √   | √   |√ |
-#### 在这里首先向前辈们致敬！只是晚辈在使用上述框架的过程中出现了很多问题，因此才想做一个更加完善的解决方案。如果大家在使用过程中有什么问题，或者有什么好的建议，欢迎留言。
+#### 在这里首先向前辈们致敬！只是晚辈在使用上述框架的过程中出现了很多问题，因此才想做一个更加完善的解决方案。如果大家在使用过程中有什么问题，或者有什么好的建议，欢迎留言。喜欢的麻烦点个赞，谢谢。
