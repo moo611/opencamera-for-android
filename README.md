@@ -111,7 +111,7 @@ private List<FilterFactory.FilterType>filters = new ArrayList<>();
             }
         });
 ```
-#### home键切出时终止录屏(可选)
+#### home键切出时别忘记更改录屏状态
 ```java
 @Override
     protected void onStop() {
