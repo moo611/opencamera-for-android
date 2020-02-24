@@ -22,7 +22,7 @@ allprojects {
 
 dependencies 
         {
-	  implementation 'com.github.moo611:OpenCamera:1.0.2'
+	  implementation 'com.github.moo611:OpenCamera:1.0.3'
 	}
 //注意添加java8支持！！！
 android{
