@@ -111,16 +111,8 @@ private List<FilterFactory.FilterType>filters = new ArrayList<>();
             }
         });
 ```
-#### home键切出时别忘记更改录屏状态
-```java
-@Override
-    protected void onStop() {
-        super.onStop();
 
-        mRecordingEnabled = false;
-        mCameraView.changeRecordingState(mRecordingEnabled);
-    }
-```
+
 # 项目比较
 |       | 多种滤镜  | 拍照  | 录制视频  |  是否维护  |
 |------| ------------ | ------------ | ------------ | ------------ |
