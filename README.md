@@ -19,10 +19,20 @@ allprojects {
         maven { url 'https://www.jitpack.io' }
     }
 }
+
 dependencies 
         {
 	  implementation 'com.github.moo611:OpenCamera:1.0.2'
 	}
+//注意添加java8支持！！！
+android{
+...
+ compileOptions {
+        sourceCompatibility 1.8
+        targetCompatibility 1.8
+    }
+}
+	
 ```
 #### xml布局文件
 ```xml
@@ -70,20 +80,38 @@ private List<FilterFactory.FilterType>filters = new ArrayList<>();
             }
         });
 ```
-
+#### 设置输出mp4文件
+```java
+ mCameraView.setOuputMP4File(your file);
+```
 #### 录制视频
 ```java
  private boolean mRecordingEnabled = false;  // 录制状态
    ...
        mRecordingEnabled = !mRecordingEnabled;
-       mCameraView.queueEvent(new Runnable() {
-           @Override public void run() {
-               // notify the renderer that we want to change the encoder's state
-               mCameraView.changeRecordingState(mRecordingEnabled);
-           }
-       });
+       mCameraView.changeRecordingState(mRecordingEnabled);
 ```
+#### 设置mp4录制完成回调
+```java
+ mCameraView.setrecordFinishedListnener(new FileCallback() {
+            @Override
+            public void onData(File file) {
 
+                //update the gallery
+                sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE,
+                        Uri.fromFile(file)));
+
+            }
+        });
+```
+#### home键切出时终止录屏(可选)
+@Override
+    protected void onStop() {
+        super.onStop();
+
+        mRecordingEnabled = false;
+        mCameraView.changeRecordingState(mRecordingEnabled);
+    }
 
 # 项目比较
 |       | 多种滤镜  | 拍照  | 录制视频  |  是否维护  |
