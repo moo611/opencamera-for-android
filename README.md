@@ -121,7 +121,7 @@ private List<FilterFactory.FilterType>filters = new ArrayList<>();
 |magiccamera| √  |  X | X  |X|
 |opencamera|  √ | √   | √   |√ |
 
-### 在这里首先向前辈们致敬！只是晚辈在使用上述框架的过程中出现了很多问题，因此才想做一个更加完善的解决方案。如果大家在使用过程中有什么问题，或者有什么好的建议，欢迎留言。喜欢的麻烦点个赞，谢谢。
+### 首先向前辈们表示尊敬和感谢！项目借鉴了很多前辈们的作品。项目还有许多不足之处，欢迎大家批评指正。
 #### google/grafika 
 https://github.com/google/grafika
 #### android gpuimage
