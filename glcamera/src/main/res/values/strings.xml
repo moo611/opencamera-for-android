@@ -1,3 +1,156 @@
 <resources>
     <string name="app_name">My Library</string>
+    <string name="main_btn_draw_image">使用 3 种不同的 API 绘制图片</string>
+    <string name="main_btn_camera">相机预览获取 NV21 数据</string>
+    <string name="main_btn_camera2">使用 Camera2 拍照</string>
+    <string name="main_btn_audio">Android API 实现音频的播放及录制</string>
+    <string name="main_btn_opensl">OpenSL 实现音频的播放及录制</string>
+    <string name="main_btn_opengl">OpenGL ES</string>
+    <string name="main_btn_hwcodec">MediaCodec 编解码</string>
+    <string name="main_btn_ffcodec">FFmpeg 编解码</string>
+    <string name="main_btn_video_play">视频播放</string>
+
+    <string name="main_msg_no_permission">权限不足，无法运行</string>
+
+
+    <!-- DrawImageActivity(draw_image) -->
+    <string name="draw_image_tv_image_view">ImageView: </string>
+    <string name="draw_image_tv_surface_view">SurfaceView: </string>
+    <string name="draw_image_tv_custom_view">Custom View: </string>
+    <string name="draw_image_iv_image_view">Draw With ImageView</string>
+
+
+    <!-- CameraActivity(camera) -->
+    <string name="camera_btn_switch">切换相机</string>
+    <string name="camera_btn_start_get_data">开始获取 NV21 数据</string>
+    <string name="camera_btn_stop">结束</string>
+
+    <string name="camera_msg_open_file_failed">无法打开输出文件!</string>
+    <string name="camera_msg_preview_failed">开启相机预览失败!</string>
+
+
+    <!-- Camera2Activity(camera2) -->
+    <string name="camera2_btn_take_picture">拍照</string>
+
+    <string name="camera2_msg_no_permission">权限不足，无法打开相机</string>
+    <string name="camera2_msg_no_camera_service">获取 Camera 服务失败</string>
+    <string name="camera2_msg_open_error">打开相机过程中出现错误!</string>
+
+
+    <!-- AudioActivity(audio) -->
+    <string name="audio_btn_start_record">开始录制</string>
+    <string name="audio_btn_stop_record">停止录制</string>
+    <string name="audio_btn_start_play">开始播放</string>
+    <string name="audio_btn_stop_play">停止播放</string>
+
+    <string name="audio_msg_no_audio_file">无音频文件，请先进行录制</string>
+    <string name="audio_msg_playing_now">当前正在播放中</string>
+
+
+    <!-- OpenSLActivity(opensl) -->
+    <string name="opensl_btn_start_play_mp3">开始播放 MP3 文件</string>
+    <string name="opensl_btn_stop_play">停止播放</string>
+    <string name="opensl_btn_start_record">开始录制</string>
+    <string name="opensl_btn_stop_record">停止录制</string>
+    <string name="opensl_btn_start_play_pcm">开始播放 PCM 文件</string>
+
+    <string name="opensl_msg_init_recorder_failed">音频录制器初始化失败!</string>
+
+
+    <!-- HWCodecActivity(hwcodec) -->
+    <string name="hwcodec_btn_decode">解码</string>
+    <string name="hwcodec_btn_transcode">转码</string>
+    <string name="hwcodec_btn_start">开始录制</string>
+    <string name="hwcodec_btn_stop">结束录制</string>
+
+    <string name="hwcodec_msg_decode_succeed">解码成功</string>
+    <string name="hwcodec_msg_decode_failed">解码失败</string>
+    <string name="hwcodec_msg_transcode_succeed">转码成功</string>
+    <string name="hwcodec_msg_transcode_failed">转码失败</string>
+    <string name="hwcodec_msg_no_video">无视频，请先进行录制</string>
+    <string name="hwcodec_msg_record_complete">视频录制已完成!</string>
+    <string name="hwcodec_msg_create_codec_failed">创建硬件编码器失败!</string>
+    <string name="hwcodec_msg_video_is_processing">视频正在处理中，请稍后…</string>
+    <string name="hwcodec_msg_preview_failed">开启相机预览失败!</string>
+
+
+    <!-- OpenGLActivity(opengl) -->
+    <string name="opengl_btn_java_triangle">Java 层绘制三角形</string>
+    <string name="opengl_btn_jni_triangle">Native 层绘制三角形</string>
+    <string name="opengl_btn_egl_circle">EGL 搭建环境绘制圆形</string>
+    <string name="opengl_btn_vao_vbo">使用 VAO &amp; VBO 特性绘制正方形</string>
+    <string name="opengl_btn_matrix_transform">矩阵变换</string>
+    <string name="opengl_btn_texture_image">使用纹理绘制图片</string>
+    <string name="opengl_btn_fbo">使用 FBO 绘制四个缓冲区</string>
+    <string name="opengl_btn_glcamera">OpenGL 相机预览</string>
+    <string name="opengl_btn_camera_effect">添加水印</string>
+    <string name="opengl_btn_beauty">美颜相机</string>
+
+    <string name="opengl_msg_not_support">不支持 OpenGL ES 3</string>
+
+
+    <!-- JavaTriangleActivityvity(jvtri) -->
+    <string name="jvtri_msg_create_program_failed">OpenGL 创建 Program 失败</string>
+    <string name="jvtri_msg_create_shader_failed">OpenGL 创建 Shader 失败</string>
+
+
+    <!-- MatrixTransform(mxtsf) -->
+    <string name="mxtsf_btn_magnify">放大</string>
+    <string name="mxtsf_btn_minify">缩小</string>
+    <string name="mxtsf_btn_left_translate">左移</string>
+    <string name="mxtsf_btn_right_translate">右移</string>
+    <string name="mxtsf_btn_left_rotate">左旋</string>
+    <string name="mxtsf_btn_right_rotate">右旋</string>
+    <string name="mxtsf_btn_mvp">MVP 矩阵</string>
+
+
+    <!-- TextureImageActivity(tex) -->
+    <string name="tex_btn_origin">原图</string>
+    <string name="tex_btn_gray">黑白</string>
+    <string name="tex_btn_blur">模糊</string>
+    <string name="tex_btn_cool">冷色调</string>
+    <string name="tex_btn_warm">暖色调</string>
+
+
+    <!-- GLCameraActivity(glcam) -->
+    <string name="glcam_msg_open_camera_failed">打开相机设备失败</string>
+
+
+    <!-- WatermarkActivity(wtmar) -->
+    <string name="wtmar_msg_open_camera_failed">打开相机设备失败</string>
+
+
+    <!-- BeautyActivity(beauty) -->
+    <string name="beauty_tv_beauty">磨皮</string>
+    <string name="beauty_tv_saturate">红润</string>
+    <string name="beauty_tv_bright">美白</string>
+    <string name="beauty_btn_switch_camera">切换相机</string>
+
+
+    <!-- VideoPalyActivity(vplay) -->
+    <string name="vplay_btn_start">开始播放</string>
+    <string name="vplay_btn_stop">停止播放</string>
+    <string name="vplay_tv_avinfo_hint">媒体文件信息:</string>
+    <string name="vplay_tv_time_hint">播放:&#160;</string>
+    <string name="vplay_tv_time">0s</string>
+
+    <string name="vplay_msg_no_file">播放失败，找不到文件!</string>
+
+
+    <!-- FFmepgActivity(ff) -->
+    <string name="ff_btn_decode">解码</string>
+    <string name="ff_btn_start_record">开始录制</string>
+    <string name="ff_btn_stop_record">结束录制</string>
+    <string name="ff_btn_transcode">转码</string>
+    <string name="ff_tv_beauty">磨皮:</string>
+    <string name="ff_tv_saturate">红润:</string>
+    <string name="ff_tv_bright">美白:</string>
+
+    <string name="ff_msg_preview_failed">相机预览开启失败</string>
+    <string name="ff_msg_record_ok">视频录制已完成!</string>
+    <string name="ff_msg_init_recorder_failed">视频录制器初始化失败!</string>
+    <string name="ff_msg_no_file">文件不存在，请先录制视频</string>
+    <string name="ff_msg_transcode_succeed">转码成功</string>
+    <string name="ff_msg_transcode_failed">转码失败</string>
+    <string name="ff_btn_switch_camera">切换相机</string>
 </resources>

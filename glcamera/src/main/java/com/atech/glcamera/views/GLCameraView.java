@@ -1,11 +1,9 @@
 package com.atech.glcamera.views;
 
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
-import android.net.Uri;
 import android.opengl.EGL14;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
@@ -15,9 +13,9 @@ import android.view.SurfaceHolder;
 
 import com.atech.glcamera.camera.CameraCore;
 import com.atech.glcamera.filters.BaseFilter;
-
 import com.atech.glcamera.gpuimage.GPUImageNativeLibrary;
-import com.atech.glcamera.grafika.TextureMovieEncoder;
+import com.atech.glcamera.grafika.my.HWRecorderWrapper;
+import com.atech.glcamera.interfaces.FileCallback;
 import com.atech.glcamera.interfaces.FilteredBitmapCallback;
 import com.atech.glcamera.utils.FileUtils;
 import com.atech.glcamera.utils.FilterFactory;
@@ -30,36 +28,40 @@ import java.util.concurrent.Semaphore;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-/**
- * glcameraview
- * created by desong 2020 0213
- */
-
 public class GLCameraView extends GLSurfaceView {
 
-    private  BaseFilter mCurrentFilter;
-    public GLRenderer renderer;
+    public GLCameraView.GLRenderer renderer;
+    private BaseFilter mCurrentFilter;
     private CameraCore mCameraHelper;
     private static final String TAG = "aaaaa";
     private Context c;
     private int mTextureId;
     private SurfaceTexture mSurfaceTexture;
     private float[] mSTMatrix = new float[16];
-    private boolean mRecordingEnabled;
-    private TextureMovieEncoder mVideoEncoder;
+    private boolean mRecordingEnabled ;
     private  FilterFactory.FilterType type;
+    private HWRecorderWrapper hwRecorderWrapper;
+    private FileCallback mFileCallback;
+
+    private static final int DEFAULT_BITRATE = 1000 * 1000;
+    private int mChannels = 1;
+    private int mSampleRate = 48000;
+    private File mOutputFile;
+    private static int STATE_ON = 1;
+    private static int STATE_OFF = 2;
+    private int state = 2;
 
     public GLCameraView(Context context) {
         super(context);
 
         init(context);
+
     }
 
     public GLCameraView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
         init(context);
-
     }
 
     private void init(Context context) {
@@ -69,34 +71,32 @@ public class GLCameraView extends GLSurfaceView {
         setEGLContextClientVersion(2);
 
         type = FilterFactory.FilterType.Original;
-        renderer = new GLRenderer(this,type);
+        renderer = new GLCameraView.GLRenderer(this,type);
         setRenderer(renderer);
         setRenderMode(RENDERMODE_WHEN_DIRTY);
 
     }
 
+
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
         super.surfaceDestroyed(holder);
 
-        Log.v("aaaaa", "destroyed");
-        mCameraHelper.releaseCamera();
-
+        if (mCameraHelper!=null){
+            mCameraHelper.releaseCamera();
+        }
+        if (hwRecorderWrapper!=null&&state==STATE_ON){
+            hwRecorderWrapper.stop();
+            state = STATE_OFF;
+            mRecordingEnabled = false;
+        }
     }
-
-    /**
-     * 内部渲染类render
-     */
 
     public class GLRenderer implements Renderer,SurfaceTexture.OnFrameAvailableListener {
 
 
         GLSurfaceView surfaceView;
-        private File mOutputFile;
-        private int mRecordingStatus;
-        private static final int RECORDING_OFF = 0;
-        private static final int RECORDING_ON = 1;
-        private static final int RECORDING_RESUMED = 2;
+
         private final Queue<Runnable> runOnDraw;
         private final Queue<Runnable> runOnDrawEnd;
 
@@ -104,9 +104,9 @@ public class GLCameraView extends GLSurfaceView {
         public GLRenderer(GLSurfaceView surfaceView, FilterFactory.FilterType type) {
 
             this.surfaceView = surfaceView;
-            mVideoEncoder = new TextureMovieEncoder(c);
+            hwRecorderWrapper = new HWRecorderWrapper(surfaceView.getContext());
             mOutputFile = FileUtils.createVideoFile();
-            mRecordingStatus = -1;
+
             mRecordingEnabled = false;
             mCameraHelper = new CameraCore(surfaceView);
             mCurrentFilter = FilterFactory.createFilter(c,type);
@@ -119,22 +119,7 @@ public class GLCameraView extends GLSurfaceView {
         @Override
         public void onSurfaceCreated(GL10 gl, EGLConfig config) {
 
-
             Log.v("aaaaa","oncreated");
-
-            mCameraHelper.openCamera(Camera.CameraInfo.CAMERA_FACING_BACK);
-            mCurrentFilter.createProgram();
-            mRecordingEnabled = mVideoEncoder.isRecording();
-            if (mRecordingEnabled) {
-                mRecordingStatus = RECORDING_RESUMED;
-            } else {
-                mRecordingStatus = RECORDING_OFF;
-            }
-
-            mTextureId = BaseFilter.bindTexture();
-            mSurfaceTexture = new SurfaceTexture(mTextureId);
-            mSurfaceTexture.setOnFrameAvailableListener(this);
-            mCameraHelper.startPreview(mSurfaceTexture);
 
         }
 
@@ -143,84 +128,74 @@ public class GLCameraView extends GLSurfaceView {
 
             Log.v("aaaaa","on size changed");
             GLES20.glViewport(0, 0, width, height);
+
+            mCameraHelper.openCamera(Camera.CameraInfo.CAMERA_FACING_BACK);
+            mCurrentFilter.createProgram();
+
+            mTextureId = BaseFilter.bindTexture();
+            mSurfaceTexture = new SurfaceTexture(mTextureId);
+            mSurfaceTexture.setOnFrameAvailableListener(this);
+            mCameraHelper.startPreview(mSurfaceTexture);
+
             mCurrentFilter.onInputSizeChanged(width,height);
 
         }
 
+        /**
+         * 关于预览出现镜像，旋转等问题，有两种方案:
+         * 1.在相机预览的地方进行调整
+         * 2.通过opengl的矩阵变换在绘制的时候进行调整
+         * 这里我采用了前者
+         */
+
         @Override
         public void onDrawFrame(GL10 gl) {
 
-           runAll(runOnDraw);
+            runAll(runOnDraw);
             mSurfaceTexture.updateTexImage();
 
-            if (mRecordingEnabled) {
-                switch (mRecordingStatus) {
-                    case RECORDING_OFF:
-                        Log.d(TAG, "START recording");
-                        // start recording
 
-                        mVideoEncoder.updateFilter(type);
-                        mVideoEncoder.startRecording(new TextureMovieEncoder.EncoderConfig(
-                                mOutputFile,
-                                mCameraHelper.fitHeight,
-                                mCameraHelper.fitWidth,
-                                1000000,
-                                EGL14.eglGetCurrentContext()));
+            if (mRecordingEnabled){
 
-                        mRecordingStatus = RECORDING_ON;
-                        break;
-                    case RECORDING_RESUMED:
-                        Log.d(TAG, "RESUME recording");
-                        mVideoEncoder.updateSharedContext(EGL14.eglGetCurrentContext());
-                        mRecordingStatus = RECORDING_ON;
-                        break;
-                    case RECORDING_ON:
-                        // yay
-                        break;
-                    default:
-                        throw new RuntimeException("unknown status " + mRecordingStatus);
+                if (state==STATE_OFF){
+                    hwRecorderWrapper.start(
+                            mCameraHelper.fitHeight,
+                            mCameraHelper.fitWidth,
+                            DEFAULT_BITRATE,mSampleRate,
+                            mChannels,mOutputFile.getAbsolutePath(),
+                            EGL14.eglGetCurrentContext());
+                    //开启麦克风
+                    state = STATE_ON;
+
+                }else{
+                    //already on
+                    //do nothing
                 }
-            } else {
-                switch (mRecordingStatus) {
-                    case RECORDING_ON:
-                    case RECORDING_RESUMED:
-                        // stop recording
-                        Log.d(TAG, "STOP recording");
-                        mVideoEncoder.stopRecording();
-                        mRecordingStatus = RECORDING_OFF;
 
-                        c.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE,
-                                Uri.fromFile(mOutputFile)));
+            }else{
 
-                        break;
-                    case RECORDING_OFF:
-                        // yay
-                        break;
-                    default:
-                        throw new RuntimeException("unknown status " + mRecordingStatus);
+                if (state==STATE_ON){
+
+                    hwRecorderWrapper.stop();
+
+                    state = STATE_OFF;
+
+                    if (mFileCallback!=null){
+
+                        mFileCallback.onData(mOutputFile);
+                    }
+
+                }else{
+                    //already off
+                    //do noting
                 }
+
             }
 
 
-            // Set the video encoder's texture name.  We only need to do this once, but in the
-            // current implementation it has to happen after the video encoder is started, so
-            // we just do it here.
-            //
-            // TODO: be less lame.
-            mVideoEncoder.setTextureId(mTextureId);
-
-            // Tell the video encoder thread that a new frame is available.
-            // This will be ignored if we're not actually recording.
-            mVideoEncoder.frameAvailable(mSurfaceTexture);
-
-            //关于预览出现镜像，旋转等问题，有两种方案:
-            // 1.在相机预览的地方进行调整
-            // 2.通过opengl的矩阵变换在绘制的时候进行调整
-            //这里我采用了前者
+            hwRecorderWrapper.onFrameAvailable(mTextureId,mSurfaceTexture);
 
             mSurfaceTexture.getTransformMatrix(mSTMatrix);
-
-           // mCurrentFilter.onInputSizeChanged(mCameraHelper.fitHeight,mCameraHelper.fitWidth);
             mCurrentFilter.draw(mTextureId,mSTMatrix);
 
             runAll(runOnDrawEnd);
@@ -229,7 +204,7 @@ public class GLCameraView extends GLSurfaceView {
 
         @Override
         public void onFrameAvailable(SurfaceTexture surfaceTexture) {
-
+            //Log.v("aaaaa","avaible");
             surfaceView.requestRender();
 
         }
@@ -265,19 +240,18 @@ public class GLCameraView extends GLSurfaceView {
         try {
             filteredBitmapCallback.onData(capture());
         } catch (InterruptedException e) {
-           Log.v("aaaaa",e.getMessage());
+            Log.v("aaaaa",e.getMessage());
         }
 
     }
 
 
-    /**
-     * Notifies the renderer that we want to stop or start recording.
-     */
-    public void changeRecordingState(boolean isRecording) {
-        Log.d(TAG, "changeRecordingState: was " + mRecordingEnabled + " now " + isRecording);
-        mRecordingEnabled = isRecording;
+    public void changeRecordingState(boolean mRecordingEnabled){
+
+       this.mRecordingEnabled  = mRecordingEnabled;
+
     }
+
 
     public void switchCamera(){
 
@@ -291,23 +265,20 @@ public class GLCameraView extends GLSurfaceView {
 
         this.type = type;
 
-        renderer.runOnDraw(new Runnable() {
-            @Override
-            public void run() {
+        renderer.runOnDraw(() -> {
 
 
-                mCurrentFilter.releaseProgram();
-                mCurrentFilter = FilterFactory.createFilter(c,type);
+            mCurrentFilter.releaseProgram();
+            mCurrentFilter = FilterFactory.createFilter(c,type);
 
-                 //调整预览画面
-                mCurrentFilter.createProgram();
-                mCurrentFilter.onInputSizeChanged(getWidth(),getHeight());
-                //调整录像画面
-                mVideoEncoder.updateFilter(type);
+            //调整预览画面
+            mCurrentFilter.createProgram();
+            mCurrentFilter.onInputSizeChanged(getWidth(),getHeight());
+            //调整录像画面
+            hwRecorderWrapper.updateFilter(type);
 
-                Log.v("aaaaa","updateFilter:"+Thread.currentThread());
+            Log.v("aaaaa","updateFilter:"+Thread.currentThread());
 
-            }
         });
 
 
@@ -319,7 +290,7 @@ public class GLCameraView extends GLSurfaceView {
      * @return current output as Bitmap
      * @throws InterruptedException
      */
-    public Bitmap capture() throws InterruptedException {
+    private Bitmap capture() throws InterruptedException {
         final Semaphore waiter = new Semaphore(0);
 
         final int width = getMeasuredWidth();
@@ -340,10 +311,21 @@ public class GLCameraView extends GLSurfaceView {
             }
         });
 
-
         requestRender();
         waiter.acquire();
         return resultBitmap;
+    }
+
+
+    public void setOuputMP4File(File file){
+
+        this.mOutputFile = file;
+
+    }
+
+    public void setrecordFinishedListnener(FileCallback fileCallback){
+
+        this.mFileCallback = fileCallback;
     }
 
 }

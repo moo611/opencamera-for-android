@@ -2,9 +2,6 @@ apply plugin: 'com.android.library'
 
 android {
     compileSdkVersion 28
-
-
-
     defaultConfig {
         minSdkVersion 22
         targetSdkVersion 28
@@ -13,6 +10,11 @@ android {
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
+    }
+
+    compileOptions {
+        sourceCompatibility 1.8
+        targetCompatibility 1.8
     }
 
     buildTypes {
@@ -26,6 +28,7 @@ android {
             path file('./src/main/cpp/CMakeLists.txt')
         }
     }
+
 
 }
 

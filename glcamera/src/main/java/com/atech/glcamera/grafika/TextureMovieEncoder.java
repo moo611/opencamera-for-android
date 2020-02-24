@@ -35,32 +35,11 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 
 /**
- * Encode a movie from frames rendered from an external texture image.
- *
- * <p>                                      dedicated:专用的   2020 0214
- *
- * The object wraps an encoder running on a dedicated thread.  The various control messages
- * may be sent from arbitrary threads (typically the app UI thread).  The encoder thread
- * manages both sides of the encoder (feeding and draining); the only external input is
- * the GL texture.
- * <p>
- * The design is complicated slightly by the need to create an EGL context that shares state
- * with a view that gets restarted if (say) the device orientation changes.  When the view
- * in question is a GLSurfaceView, we don't have full control over the EGL context creation
- * on that side, so we have to bend a bit backwards here.
- * <p>
- * To use:
- * <ul>
- * <li>create TextureMovieEncoder object
- * <li>create an EncoderConfig
- * <li>call TextureMovieEncoder#startRecording() with the config
- * <li>call TextureMovieEncoder#setTextureId() with the texture object that receives frames
- * <li>for each frame, after latching it with SurfaceTexture#updateTexImage(),
- *     call TextureMovieEncoder#frameAvailable().
- * </ul>
- *
- * TODO: tweak the API (esp. textureId) so it's less awkward for simple use cases.
+ * 由于不能录制音频，现在已弃用，改用my包里的encoder.
+ * @Author desong
+ * 2020 2.24
  */
+@Deprecated
 public class TextureMovieEncoder implements Runnable {
     private static final String TAG = "aaaaa";
     private static final boolean VERBOSE = false;
@@ -78,7 +57,7 @@ public class TextureMovieEncoder implements Runnable {
     private BaseFilter mFullScreen;
     private FilterFactory.FilterType type = FilterFactory.FilterType.Original;
     private int mTextureId;
-    private int mFrameNum;
+
     private VideoEncoderCore mVideoEncoder;
 
     // ----- accessed by multiple threads -----
@@ -91,6 +70,7 @@ public class TextureMovieEncoder implements Runnable {
 
     private static int mWidth;
     private static int mHeight;
+
 
     public TextureMovieEncoder(Context c){
 
@@ -324,7 +304,7 @@ public class TextureMovieEncoder implements Runnable {
      */
     private void handleStartRecording(EncoderConfig config) {
         Log.d(TAG, "handleStartRecording " + config);
-        mFrameNum = 0;
+
         prepareEncoder(config.mEglContext, mWidth, mHeight, config.mBitRate,
                 config.mOutputFile);
     }
@@ -340,6 +320,7 @@ public class TextureMovieEncoder implements Runnable {
      */
     private void handleFrameAvailable(float[] transform, long timestampNanos) {
         if (VERBOSE) Log.d(TAG, "handleFrameAvailable tr=" + transform);
+
         mVideoEncoder.drainEncoder(false);
         mFullScreen.draw(mTextureId, transform);
 
@@ -347,13 +328,14 @@ public class TextureMovieEncoder implements Runnable {
         mInputWindowSurface.swapBuffers();
     }
 
-
     /**
      * Handles a request to stop encoding.
      */
     private void handleStopRecording() {
         Log.d(TAG, "handleStopRecording");
+
         mVideoEncoder.drainEncoder(true);
+
         releaseEncoder();
     }
 
@@ -406,6 +388,8 @@ public class TextureMovieEncoder implements Runnable {
         mFullScreen.createProgram();
         mFullScreen.onInputSizeChanged(width,height);
         Log.v("aaaaa","prepareEncoder:"+Thread.currentThread());
+
+
     }
 
     private void releaseEncoder() {

@@ -5,6 +5,8 @@ import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
@@ -32,11 +34,16 @@ public class CameraCore {
     public int fitWidth;
     public int fitHeight;
     public int videoSizes[] = new int[2];
-
+    HandlerThread cameraThread;
+    Handler handler;
     
     public CameraCore(SurfaceView surfaceView) {
 
         this.surfaceView = surfaceView;
+
+        cameraThread = new HandlerThread("cameraThread");
+        cameraThread.start();
+        handler = new Handler(cameraThread.getLooper());
 
     }
 
@@ -44,51 +51,53 @@ public class CameraCore {
      * 打开相机
      */
 
-    public void openCamera(int mCameraId){
-        try {
+    public void openCamera(int mCameraId0){
 
-            this.mCameraId = mCameraId;
-            mCamera = Camera.open(mCameraId);
+        handler.post(() -> {
+            try {
+
+                mCameraId = mCameraId0;
+                mCamera = Camera.open(mCameraId0);
 
 
-            Camera.Parameters parameters = mCamera.getParameters();
+                Camera.Parameters parameters = mCamera.getParameters();
 
-            if (parameters.getSupportedFocusModes().contains(
-                    Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
-                parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
+                if (parameters.getSupportedFocusModes().contains(
+                        Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
+                    parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
+                }
+
+                //1.设置预览尺寸，防止预览画面变形
+                List<Camera.Size> sizes1 = parameters.getSupportedPreviewSizes(); //得到的比例，宽是大头
+                int[] result1 = getOptimalSize(sizes1, surfaceView.getWidth(), surfaceView.getHeight());
+                parameters.setPreviewSize(result1[0], result1[1]);
+                //2.设置拍照取得的图片尺寸
+                List<Camera.Size>sizes2 = parameters.getSupportedPictureSizes();
+                int[] result2 = getOptimalSize(sizes2,surfaceView.getWidth(),surfaceView.getHeight());
+                parameters.setPictureSize(result2[0],result2[1]);
+                fitWidth = result1[0];
+                fitHeight = result1[1];
+                mCamera.setParameters(parameters);
+                //3.得到video尺寸，传给mediarecorder
+                List<Camera.Size>sizes3 = parameters.getSupportedVideoSizes();
+                videoSizes=getOptimalSize(sizes3,surfaceView.getWidth(),surfaceView.getHeight());
+
+
+                Log.v("aaaaa","previewsize:"+result1[0]+"///"+result1[1]);
+                Log.v("aaaaa","imagesize:"+result2[0]+"///"+result2[1]);
+                Log.v("aaaaa","videosize:"+videoSizes[0]+"///"+videoSizes[1]);
+
+
+                //设置相机方向
+                setCameraDisplayOrientation(mCameraId);
+
+            }catch (Exception e){
+
+                Log.v("aaaaa",e.getMessage());
             }
-
-            //1.设置预览尺寸，防止预览画面变形
-            List<Camera.Size> sizes1 = parameters.getSupportedPreviewSizes(); //得到的比例，宽是大头
-            int[] result1 = getOptimalSize(sizes1, surfaceView.getWidth(), surfaceView.getHeight());
-            parameters.setPreviewSize(result1[0], result1[1]);
-            //2.设置拍照取得的图片尺寸
-            List<Camera.Size>sizes2 = parameters.getSupportedPictureSizes();
-            int[] result2 = getOptimalSize(sizes2,surfaceView.getWidth(),surfaceView.getHeight());
-            parameters.setPictureSize(result2[0],result2[1]);
-            fitWidth = result1[0];
-            fitHeight = result1[1];
-            mCamera.setParameters(parameters);
-            //3.得到video尺寸，传给mediarecorder
-            List<Camera.Size>sizes3 = parameters.getSupportedVideoSizes();
-            videoSizes=getOptimalSize(sizes3,surfaceView.getWidth(),surfaceView.getHeight());
-
-
-            Log.v("aaaaa","previewsize:"+result1[0]+"///"+result1[1]);
-            Log.v("aaaaa","imagesize:"+result2[0]+"///"+result2[1]);
-            Log.v("aaaaa","videosize:"+videoSizes[0]+"///"+videoSizes[1]);
-
-
-            //设置相机方向
-            setCameraDisplayOrientation(mCameraId);
-
-        }catch (Exception e){
-
-            Log.v("aaaaa",e.getMessage());
-        }
+        });
 
     }
-
 
 
     /**
@@ -97,10 +106,18 @@ public class CameraCore {
 
     public void releaseCamera() {
 
-        mCamera.stopPreview();
-        //释放向机
-        mCamera.release();
-        mCamera = null;
+        handler.post(() -> {
+            if (mCamera!=null){
+
+                mCamera.stopPreview();
+                //释放向机
+                mCamera.release();
+                mCamera = null;
+
+            }
+        });
+
+
 
     }
 
@@ -205,17 +222,22 @@ public class CameraCore {
 
     public SurfaceTexture texture;
 
-    public void startPreview(SurfaceTexture texture) {
+    public void startPreview(SurfaceTexture texture0) {
 
-        this.texture = texture;
 
-        try {
-            mCamera.setPreviewTexture(texture);
-            mCamera.startPreview();
+        handler.post(() -> {
 
-        } catch (IOException e) {
-            Log.v("glcamera",e.getMessage());
-        }
+            texture = texture0;
+
+            try {
+                mCamera.setPreviewTexture(texture);
+                mCamera.startPreview();
+
+            } catch (IOException e) {
+                Log.v("glcamera",e.getMessage());
+            }
+        });
+
 
     }
 
@@ -223,15 +245,21 @@ public class CameraCore {
 
     public void switchCamera() {
 
-        if (mCameraId == Camera.CameraInfo.CAMERA_FACING_FRONT) {
-            mCameraId = Camera.CameraInfo.CAMERA_FACING_BACK;
-        } else {
-            mCameraId = Camera.CameraInfo.CAMERA_FACING_FRONT;
-        }
+        handler.post(() -> {
 
-        releaseCamera();
-        openCamera(mCameraId);
-        startPreview(texture);
+            if (mCameraId == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+                mCameraId = Camera.CameraInfo.CAMERA_FACING_BACK;
+            } else {
+                mCameraId = Camera.CameraInfo.CAMERA_FACING_FRONT;
+            }
+
+            releaseCamera();
+            openCamera(mCameraId);
+            startPreview(texture);
+
+        });
+
+
 
     }
 
@@ -245,27 +273,34 @@ public class CameraCore {
 
     public void startPreview(SurfaceHolder holder) {
 
+        handler.post(() -> {
+            try {
+                mCamera.setPreviewDisplay(holder);
+                mCamera.startPreview();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
-        try {
-            mCamera.setPreviewDisplay(holder);
-            mCamera.startPreview();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        });
+
 
     }
 
     public void switchCamera(SurfaceHolder holder) {
 
-        if (mCameraId == Camera.CameraInfo.CAMERA_FACING_FRONT) {
-            mCameraId = Camera.CameraInfo.CAMERA_FACING_BACK;
-        } else {
-            mCameraId = Camera.CameraInfo.CAMERA_FACING_FRONT;
-        }
+        handler.post(() -> {
+            if (mCameraId == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+                mCameraId = Camera.CameraInfo.CAMERA_FACING_BACK;
+            } else {
+                mCameraId = Camera.CameraInfo.CAMERA_FACING_FRONT;
+            }
 
-        releaseCamera();
-        openCamera(mCameraId);
-        startPreview(holder);
+            releaseCamera();
+            openCamera(mCameraId);
+            startPreview(holder);
+        });
+
+
 
     }
 
@@ -275,15 +310,9 @@ public class CameraCore {
      */
     public void takePicture(final ImageCallback imageCallback) {
 
-        mCamera.takePicture(null, null, new Camera.PictureCallback() {
-            @Override
-            public void onPictureTaken(byte[] data, Camera camera) {
+        handler.post(() -> mCamera.takePicture(null, null, (data, camera) ->
+                imageCallback.onData(data)));
 
-                imageCallback.onData(data);
-
-
-            }
-        });
 
     }
 
@@ -293,32 +322,39 @@ public class CameraCore {
 
     public void startRecord(){
 
-        prepareMediarecorder();
+        handler.post(() -> {
+            prepareMediarecorder();
 
-        try {
-            mMediaRecorder.start();
-        }catch (Exception e){
-            Log.v("aaaaa",e.getMessage());
-        }
+            try {
+                mMediaRecorder.start();
+            }catch (Exception e){
+                Log.v("aaaaa",e.getMessage());
+            }
+        });
+
+
 
     }
 
     public void stopRecord(FileCallback fileCallback){
 
+       handler.post(() -> {
 
-        if(mMediaRecorder != null){
-            mMediaRecorder.release();
-            mMediaRecorder = null;
-        }
+           if(mMediaRecorder != null){
+               mMediaRecorder.release();
+               mMediaRecorder = null;
+           }
 
-        if(mCamera != null){
-            mCamera.release();
-        }
-        openCamera(mCameraId);
-        //并设置预览
-        startPreview(surfaceView.getHolder());
+           if(mCamera != null){
+               mCamera.release();
+           }
+           openCamera(mCameraId);
+           //并设置预览
+           startPreview(surfaceView.getHolder());
 
-        fileCallback.onData(outputFile);
+           fileCallback.onData(outputFile);
+       });
+
 
     }
 
@@ -362,11 +398,13 @@ public class CameraCore {
 
     public void releaseMediaRecorder(){
 
+       handler.post(() -> {
+           if(mMediaRecorder != null){
+               mMediaRecorder.release();
+               mMediaRecorder = null;
+           }
+       });
 
-        if(mMediaRecorder != null){
-            mMediaRecorder.release();
-            mMediaRecorder = null;
-        }
 
     }
 

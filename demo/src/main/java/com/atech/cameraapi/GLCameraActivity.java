@@ -15,6 +15,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.atech.glcamera.interfaces.FileCallback;
 import com.atech.glcamera.interfaces.FilteredBitmapCallback;
 import com.atech.glcamera.utils.FileUtils;
 import com.atech.glcamera.utils.FilterFactory;
@@ -131,6 +132,19 @@ public class GLCameraActivity extends AppCompatActivity implements View.OnClickL
         infos.add(new FilterInfo(R.drawable.filter_thumb_antique,"复古"));
         infos.add(new FilterInfo(R.drawable.filter_thumb_brannan,"Brannan"));
 
+        //set your own output file here
+       // mCameraView.setOuputMP4File();
+       //set record finish listener
+        mCameraView.setrecordFinishedListnener(new FileCallback() {
+            @Override
+            public void onData(File file) {
+
+                //update the gallery
+                sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE,
+                        Uri.fromFile(file)));
+
+            }
+        });
     }
 
     @Override
@@ -225,7 +239,17 @@ public class GLCameraActivity extends AppCompatActivity implements View.OnClickL
 
     }
 
-   private void onRecord(){
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        mRecordingEnabled = false;
+        mCameraView.changeRecordingState(mRecordingEnabled);
+
+    }
+
+    private void onRecord(){
 
        mRecordingEnabled = !mRecordingEnabled;
 
