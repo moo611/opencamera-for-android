@@ -41,7 +41,7 @@ public class VideoEncoderCore {
     private static final String TAG = "aaaaa";
     private static final boolean VERBOSE = false;
 
-    // TODO: these ought to be configurable as well
+
     private static final String MIME_TYPE = "video/avc";    // H.264 Advanced Video Coding
     private static final int FRAME_RATE = 30;               // 30fps
     private static final int IFRAME_INTERVAL = 5;           // 5 seconds between I-frames

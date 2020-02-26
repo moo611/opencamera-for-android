@@ -91,6 +91,8 @@ public class CameraCore {
                 //设置相机方向
                 setCameraDisplayOrientation(mCameraId);
 
+                Log.v("aaaaa","thread"+Thread.currentThread().getName());
+
             }catch (Exception e){
 
                 Log.v("aaaaa",e.getMessage());

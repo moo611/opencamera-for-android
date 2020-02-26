@@ -19,28 +19,11 @@ allprojects {
         maven { url 'https://www.jitpack.io' }
     }
 }
-
 dependencies 
         {
-	  implementation 'com.github.moo611:OpenCamera:1.0.3'
+	  implementation 'com.github.moo611:OpenCamera:1.0.2'
 	}
-//注意添加java8支持！！！
-android{
-...
- compileOptions {
-        sourceCompatibility 1.8
-        targetCompatibility 1.8
-    }
-}
-	
 ```
-#### 添加权限
-```
-    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.CAMERA
-```    
 #### xml布局文件
 ```xml
  <com.atech.glcamera.views.GLCameraView
@@ -87,29 +70,18 @@ private List<FilterFactory.FilterType>filters = new ArrayList<>();
             }
         });
 ```
-#### 设置输出mp4文件
-```java
- mCameraView.setOuputMP4File(your file);
-```
+
 #### 录制视频
 ```java
  private boolean mRecordingEnabled = false;  // 录制状态
    ...
        mRecordingEnabled = !mRecordingEnabled;
-       mCameraView.changeRecordingState(mRecordingEnabled);
-```
-#### 设置mp4录制完成回调
-```java
- mCameraView.setrecordFinishedListnener(new FileCallback() {
-            @Override
-            public void onData(File file) {
-
-                //update the gallery
-                sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE,
-                        Uri.fromFile(file)));
-
-            }
-        });
+       mCameraView.queueEvent(new Runnable() {
+           @Override public void run() {
+               // notify the renderer that we want to change the encoder's state
+               mCameraView.changeRecordingState(mRecordingEnabled);
+           }
+       });
 ```
 
 
@@ -121,7 +93,7 @@ private List<FilterFactory.FilterType>filters = new ArrayList<>();
 |magiccamera| √  |  X | X  |X|
 |opencamera|  √ | √   | √   |√ |
 
-### 首先向前辈们表示尊敬和感谢！项目借鉴了很多前辈们的作品。如果您喜欢我的项目，请给我点个赞，谢谢。
+### 在这里首先向前辈们致敬！只是晚辈在使用上述框架的过程中出现了很多问题，因此才想做一个更加完善的解决方案。如果大家在使用过程中有什么问题，或者有什么好的建议，欢迎留言。喜欢的麻烦点个赞，谢谢。
 #### google/grafika 
 https://github.com/google/grafika
 #### android gpuimage

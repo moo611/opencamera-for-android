@@ -253,12 +253,8 @@ public class GLCameraActivity extends AppCompatActivity implements View.OnClickL
 
        mRecordingEnabled = !mRecordingEnabled;
 
-       mCameraView.queueEvent(new Runnable() {
-           @Override public void run() {
-               // notify the renderer that we want to change the encoder's state
-               mCameraView.changeRecordingState(mRecordingEnabled);
-           }
-       });
+       mCameraView.changeRecordingState(mRecordingEnabled);
+
 
        if (mRecordingEnabled){
 

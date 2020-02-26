@@ -164,7 +164,7 @@ public class HWRecorderWrapper implements AudioRecorder.AudioRecordCallback {
         }
         mVideoHandler.post(() -> {
 
-            float[] transform = new float[16];      
+            float[] transform = new float[16];
             st.getTransformMatrix(transform);
 
             //每帧间隔多少毫秒

@@ -14,4 +14,18 @@ public class ExampleUnitTest {
     public void addition_isCorrect() {
         assertEquals(4, 2 + 2);
     }
+
+
+
+
+
+    /**
+     * Capture the current image with the size as it is displayed and retrieve it as Bitmap.
+     *
+     * @return current output as Bitmap
+     * @throws InterruptedException
+     */
+
+
+
 }
