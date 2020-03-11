@@ -11,6 +11,7 @@ import android.os.SystemClock;
 import android.util.Log;
 
 import com.atech.glcamera.filters.BaseFilter;
+import com.atech.glcamera.filters.BeautyFilter;
 import com.atech.glcamera.grafika.gles.EglCore;
 import com.atech.glcamera.grafika.gles.WindowSurface;
 import com.atech.glcamera.utils.FilterFactory;
@@ -58,6 +59,14 @@ public class HWRecorderWrapper implements AudioRecorder.AudioRecordCallback {
         mVExecutor.start();
         mAExecutor.start();
 
+
+    }
+
+    public void changeBeautyLevel(float beautyLevel) {
+
+         if (mFullScreen instanceof BeautyFilter){
+             ((BeautyFilter) mFullScreen).setSmoothOpacity(beautyLevel);
+         }
 
     }
 

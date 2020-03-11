@@ -10,9 +10,9 @@ import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.SurfaceHolder;
-
 import com.atech.glcamera.camera.CameraCore;
 import com.atech.glcamera.filters.BaseFilter;
+import com.atech.glcamera.filters.BeautyFilter;
 import com.atech.glcamera.gpuimage.GPUImageNativeLibrary;
 import com.atech.glcamera.grafika.my.HWRecorderWrapper;
 import com.atech.glcamera.interfaces.FileCallback;
@@ -70,10 +70,12 @@ public class GLCameraView extends GLSurfaceView {
 
         setEGLContextClientVersion(2);
 
-        type = FilterFactory.FilterType.Original;
+        type = FilterFactory.FilterType.Beauty;
+
         renderer = new GLCameraView.GLRenderer(this,type);
         setRenderer(renderer);
         setRenderMode(RENDERMODE_WHEN_DIRTY);
+
 
     }
 
@@ -101,6 +103,7 @@ public class GLCameraView extends GLSurfaceView {
         private final Queue<Runnable> runOnDrawEnd;
 
 
+
         public GLRenderer(GLSurfaceView surfaceView, FilterFactory.FilterType type) {
 
             this.surfaceView = surfaceView;
@@ -114,30 +117,30 @@ public class GLCameraView extends GLSurfaceView {
             runOnDraw = new LinkedList<>();
             runOnDrawEnd = new LinkedList<>();
 
+
         }
 
         @Override
         public void onSurfaceCreated(GL10 gl, EGLConfig config) {
 
-            Log.v("aaaaa","oncreated");
 
         }
 
         @Override
         public void onSurfaceChanged(GL10 gl, int width, int height) {
 
-            Log.v("aaaaa","on size changed");
+
             GLES20.glViewport(0, 0, width, height);
 
             mCameraHelper.openCamera(Camera.CameraInfo.CAMERA_FACING_BACK);
             mCurrentFilter.createProgram();
+            mCurrentFilter.onInputSizeChanged(getWidth(),getHeight());
 
             mTextureId = BaseFilter.bindTexture();
             mSurfaceTexture = new SurfaceTexture(mTextureId);
             mSurfaceTexture.setOnFrameAvailableListener(this);
             mCameraHelper.startPreview(mSurfaceTexture);
 
-            mCurrentFilter.onInputSizeChanged(width,height);
 
         }
 
@@ -164,7 +167,7 @@ public class GLCameraView extends GLSurfaceView {
                             DEFAULT_BITRATE,mSampleRate,
                             mChannels,mOutputFile.getAbsolutePath(),
                             EGL14.eglGetCurrentContext());
-                    //开启麦克风
+
                     state = STATE_ON;
 
                 }else{
@@ -299,16 +302,13 @@ public class GLCameraView extends GLSurfaceView {
         // Take picture on OpenGL thread
         final Bitmap resultBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
 
-        renderer.runOnDrawEnd(new Runnable() {
-            @Override
-            public void run() {
+        renderer.runOnDrawEnd(() -> {
 
-                GPUImageNativeLibrary.adjustBitmap(resultBitmap);
-                waiter.release();
+            GPUImageNativeLibrary.adjustBitmap(resultBitmap);
+            waiter.release();
 
-                Log.v("aaaaa","curent thread is:"+Thread.currentThread().getName());
+            Log.v("aaaaa","curent thread is:"+Thread.currentThread().getName());
 
-            }
         });
 
         requestRender();
@@ -326,6 +326,36 @@ public class GLCameraView extends GLSurfaceView {
     public void setrecordFinishedListnener(FileCallback fileCallback){
 
         this.mFileCallback = fileCallback;
+    }
+
+    public void enableBeauty(boolean enableBeauty){
+
+        if (enableBeauty){
+
+            type = FilterFactory.FilterType.Beauty;
+
+        }else{
+
+            type = FilterFactory.FilterType.Original;
+        }
+
+        updateFilter(type);
+    }
+
+    /**
+     * 0~1
+     * @param beautyLevel
+     */
+    public void setBeautyLevel(float beautyLevel){
+
+        if (mCurrentFilter instanceof BeautyFilter){
+
+            ((BeautyFilter) mCurrentFilter).setSmoothOpacity(beautyLevel);
+            hwRecorderWrapper.changeBeautyLevel(beautyLevel);
+
+
+        }
+
     }
 
 }

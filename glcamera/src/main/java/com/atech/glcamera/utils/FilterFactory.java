@@ -3,6 +3,7 @@ package com.atech.glcamera.utils;
 import android.content.Context;
 
 import com.atech.glcamera.filters.BaseFilter;
+import com.atech.glcamera.filters.BeautyFilter;
 import com.atech.glcamera.filters.BlackCatFilter;
 import com.atech.glcamera.filters.BlackFilter;
 import com.atech.glcamera.filters.HealthyFilter;
@@ -45,7 +46,8 @@ public class FilterFactory {
         Sweets,
         Amaro,
         Antique,
-        Brannan
+        Brannan,
+        Beauty
     }
 
     public static BaseFilter createFilter(Context c, FilterType filterType) {
@@ -155,6 +157,13 @@ public class FilterFactory {
                 baseFilter = new BrannanFilter(c);
 
                 break;
+            case Beauty:
+
+                baseFilter = new BeautyFilter(c);
+
+                break;
+
+
         }
 
         return baseFilter;

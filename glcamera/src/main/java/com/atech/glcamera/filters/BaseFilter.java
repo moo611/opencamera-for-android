@@ -27,8 +27,8 @@ public abstract class BaseFilter {
 
             -1.0f, -1.0f,   // 0 bottom left
             1.0f, -1.0f,   // 1 bottom right
-            -1.0f,  1.0f,   // 2 top left
-            1.0f,  1.0f,   // 3 top right
+            -1.0f, 1.0f,   // 2 top left
+            1.0f, 1.0f,   // 3 top right
     };
 
     private static float textureVertices[] = {
@@ -49,9 +49,9 @@ public abstract class BaseFilter {
     protected int mGLAttribPosition;
     protected int mGLUniformTexture;
     protected int mGLAttribTextureCoordinate;
+    protected int mHMatrix;
 
-
-    public BaseFilter(Context c){
+    public BaseFilter(Context c) {
 
         this.c = c;
         vertexBuffer = createBuffer(squareCoords);
@@ -90,7 +90,7 @@ public abstract class BaseFilter {
         if (mProgram == 0) {
             throw new RuntimeException("Unable to create program");
         }
-        Log.v("aaaaa","program created");
+        Log.v("aaaaa", "program created");
 
 
         //共用句柄
@@ -98,14 +98,14 @@ public abstract class BaseFilter {
         mGLUniformTexture = GLES20.glGetUniformLocation(mProgram, "inputImageTexture");
         mGLAttribTextureCoordinate = GLES20.glGetAttribLocation(mProgram,
                 "aTextureCoordinate");
-
+        mHMatrix = GLES20.glGetUniformLocation(mProgram, "uTextureMatrix");
     }
 
     /**
      * 开始绘制
      */
 
-    public void draw(int textureId,float[]metrix){
+    public void draw(int textureId, float[] metrix) {
 
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
@@ -128,7 +128,6 @@ public abstract class BaseFilter {
         }
 
 
-        int mHMatrix = GLES20.glGetUniformLocation(mProgram, "uTextureMatrix");
         GLES20.glUniformMatrix4fv(mHMatrix, 1, false, metrix, 0);
 
         onDrawArraysPre();
@@ -139,13 +138,16 @@ public abstract class BaseFilter {
         GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, 0);
         GLES20.glUseProgram(0);
 
-    };
+    }
+
+    ;
 
 
     protected abstract void onDrawArraysPre();
+
     protected abstract void onDrawArraysAfter();
 
-    public void releaseProgram(){
+    public void releaseProgram() {
 
         Log.v("aaaaa", "deleting program " + mProgram);
         GLES20.glDeleteProgram(mProgram);
@@ -154,7 +156,8 @@ public abstract class BaseFilter {
     }
 
     /**
-     * 注意此处一定要用runondraw,因为要在useprogram之后执行。别问为什么，你把它去掉看好不好使就完了...
+     * 注意此处一定要用runondraw,因为要在useprogram之后执行
+     *
      * @param location
      * @param floatValue
      */
@@ -182,6 +185,17 @@ public abstract class BaseFilter {
         });
 
 
+    }
+
+
+    protected void setFloatVec4(final int location, final float[] arrayValue) {
+
+        runOnDraw(new Runnable() {
+            @Override
+            public void run() {
+                GLES20.glUniform4fv(location, 1, FloatBuffer.wrap(arrayValue));
+            }
+        });
 
     }
 
@@ -197,7 +211,7 @@ public abstract class BaseFilter {
 
     }
 
-    public void onInputSizeChanged(final int width, final int height){
+    public void onInputSizeChanged(final int width, final int height) {
 
     }
 
@@ -238,6 +252,7 @@ public abstract class BaseFilter {
         return sb.toString();
 
     }
+
     /**
      * 绑定纹理
      *
@@ -269,6 +284,7 @@ public abstract class BaseFilter {
             mRunOnDraw.removeFirst().run();
         }
     }
+
     protected void runOnDraw(final Runnable runnable) {
         synchronized (mRunOnDraw) {
             mRunOnDraw.addLast(runnable);
