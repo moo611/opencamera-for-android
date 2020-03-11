@@ -22,7 +22,7 @@ allprojects {
 }
 dependencies 
         {
-	  implementation 'com.github.moo611:OpenCamera:1.0.2'
+	  implementation 'com.github.moo611:OpenCamera:1.0.4'
 	}
 ```
 #### xml布局文件
@@ -33,7 +33,10 @@ dependencies
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 ```
-
+#### 开启或关闭美颜（默认开启）
+```java
+ mCameraView.enableBeauty(true);
+```
 
 #### 添加滤镜
 
@@ -83,6 +86,23 @@ private List<FilterFactory.FilterType>filters = new ArrayList<>();
                mCameraView.changeRecordingState(mRecordingEnabled);
            }
        });
+```
+
+#### 设置视频保存路径及拍摄完成的回调
+```java
+ 
+        mCameraView.setOuputMP4File(mFile);
+       
+        mCameraView.setrecordFinishedListnener(new FileCallback() {
+            @Override
+            public void onData(File file) {
+
+                //update the gallery
+                sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE,
+                        Uri.fromFile(file)));
+
+            }
+        });
 ```
 
 
