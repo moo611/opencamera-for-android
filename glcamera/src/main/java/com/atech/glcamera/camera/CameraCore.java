@@ -34,16 +34,12 @@ public class CameraCore {
     public int fitWidth;
     public int fitHeight;
     public int videoSizes[] = new int[2];
-    HandlerThread cameraThread;
-    Handler handler;
+
     
     public CameraCore(SurfaceView surfaceView) {
 
         this.surfaceView = surfaceView;
 
-        cameraThread = new HandlerThread("cameraThread");
-        cameraThread.start();
-        handler = new Handler(cameraThread.getLooper());
 
     }
 
@@ -53,7 +49,7 @@ public class CameraCore {
 
     public void openCamera(int mCameraId0){
 
-        handler.post(() -> {
+
             try {
 
                 mCameraId = mCameraId0;
@@ -71,33 +67,29 @@ public class CameraCore {
                 List<Camera.Size> sizes1 = parameters.getSupportedPreviewSizes(); //得到的比例，宽是大头
                 int[] result1 = getOptimalSize(sizes1, surfaceView.getWidth(), surfaceView.getHeight());
                 parameters.setPreviewSize(result1[0], result1[1]);
+                fitWidth = result1[0];
+                fitHeight = result1[1];
+
                 //2.设置拍照取得的图片尺寸
                 List<Camera.Size>sizes2 = parameters.getSupportedPictureSizes();
                 int[] result2 = getOptimalSize(sizes2,surfaceView.getWidth(),surfaceView.getHeight());
                 parameters.setPictureSize(result2[0],result2[1]);
-                fitWidth = result1[0];
-                fitHeight = result1[1];
-                mCamera.setParameters(parameters);
+
                 //3.得到video尺寸，传给mediarecorder
                 List<Camera.Size>sizes3 = parameters.getSupportedVideoSizes();
                 videoSizes=getOptimalSize(sizes3,surfaceView.getWidth(),surfaceView.getHeight());
 
 
-                Log.v("aaaaa","previewsize:"+result1[0]+"///"+result1[1]);
-                Log.v("aaaaa","imagesize:"+result2[0]+"///"+result2[1]);
-                Log.v("aaaaa","videosize:"+videoSizes[0]+"///"+videoSizes[1]);
-
+                mCamera.setParameters(parameters);
 
                 //设置相机方向
                 setCameraDisplayOrientation(mCameraId);
-
-                Log.v("aaaaa","thread"+Thread.currentThread().getName());
 
             }catch (Exception e){
 
                 Log.v("aaaaa",e.getMessage());
             }
-        });
+
 
     }
 
@@ -108,7 +100,7 @@ public class CameraCore {
 
     public void releaseCamera() {
 
-        handler.post(() -> {
+
             if (mCamera!=null){
 
                 mCamera.stopPreview();
@@ -117,8 +109,6 @@ public class CameraCore {
                 mCamera = null;
 
             }
-        });
-
 
 
     }
@@ -226,9 +216,6 @@ public class CameraCore {
 
     public void startPreview(SurfaceTexture texture0) {
 
-
-        handler.post(() -> {
-
             texture = texture0;
 
             try {
@@ -238,7 +225,7 @@ public class CameraCore {
             } catch (IOException e) {
                 Log.v("glcamera",e.getMessage());
             }
-        });
+
 
 
     }
@@ -247,7 +234,7 @@ public class CameraCore {
 
     public void switchCamera() {
 
-        handler.post(() -> {
+
 
             if (mCameraId == Camera.CameraInfo.CAMERA_FACING_FRONT) {
                 mCameraId = Camera.CameraInfo.CAMERA_FACING_BACK;
@@ -258,8 +245,6 @@ public class CameraCore {
             releaseCamera();
             openCamera(mCameraId);
             startPreview(texture);
-
-        });
 
 
 
@@ -275,7 +260,7 @@ public class CameraCore {
 
     public void startPreview(SurfaceHolder holder) {
 
-        handler.post(() -> {
+
             try {
                 mCamera.setPreviewDisplay(holder);
                 mCamera.startPreview();
@@ -283,14 +268,11 @@ public class CameraCore {
                 e.printStackTrace();
             }
 
-        });
-
-
     }
 
     public void switchCamera(SurfaceHolder holder) {
 
-        handler.post(() -> {
+
             if (mCameraId == Camera.CameraInfo.CAMERA_FACING_FRONT) {
                 mCameraId = Camera.CameraInfo.CAMERA_FACING_BACK;
             } else {
@@ -300,8 +282,6 @@ public class CameraCore {
             releaseCamera();
             openCamera(mCameraId);
             startPreview(holder);
-        });
-
 
 
     }
@@ -312,8 +292,8 @@ public class CameraCore {
      */
     public void takePicture(final ImageCallback imageCallback) {
 
-        handler.post(() -> mCamera.takePicture(null, null, (data, camera) ->
-                imageCallback.onData(data)));
+         mCamera.takePicture(null, null, (data, camera) ->
+                imageCallback.onData(data));
 
 
     }
@@ -324,7 +304,7 @@ public class CameraCore {
 
     public void startRecord(){
 
-        handler.post(() -> {
+
             prepareMediarecorder();
 
             try {
@@ -332,15 +312,13 @@ public class CameraCore {
             }catch (Exception e){
                 Log.v("aaaaa",e.getMessage());
             }
-        });
-
 
 
     }
 
     public void stopRecord(FileCallback fileCallback){
 
-       handler.post(() -> {
+
 
            if(mMediaRecorder != null){
                mMediaRecorder.release();
@@ -355,8 +333,6 @@ public class CameraCore {
            startPreview(surfaceView.getHolder());
 
            fileCallback.onData(outputFile);
-       });
-
 
     }
 
@@ -397,16 +373,12 @@ public class CameraCore {
 
     }
 
-
     public void releaseMediaRecorder(){
 
-       handler.post(() -> {
            if(mMediaRecorder != null){
                mMediaRecorder.release();
                mMediaRecorder = null;
            }
-       });
-
 
     }
 
