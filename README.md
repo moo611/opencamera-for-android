@@ -52,7 +52,7 @@ dependencies
 #### 美颜程度（0~1）
 ```java
 mCameraView.setBeautyLevel(0.5f);
-...
+```
 #### 添加滤镜
 
 ```java
