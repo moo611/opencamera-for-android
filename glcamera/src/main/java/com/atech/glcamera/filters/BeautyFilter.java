@@ -17,7 +17,7 @@ public class BeautyFilter extends BaseFilter {
     public BeautyFilter(Context c) {
         super(c);
 
-        setSmoothOpacity(1.0f);//默认
+        setSmoothOpacity(0.5f);//默认
 
     }
 
@@ -84,7 +84,6 @@ public class BeautyFilter extends BaseFilter {
     private float calculateOpacity(float percent) {
         float result;
 
-        // TODO 可以加入分段函数，对不同等级的磨皮进行不一样的处理
         result = (float) (1.0f - (1.0f - percent + 0.02) / 2.0f);
 
         return result;
