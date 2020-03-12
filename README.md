@@ -24,6 +24,11 @@ dependencies
         {
 	  implementation 'com.github.moo611:opencamera:1.0.4'
 	}
+//注意在android代码块里添加java8支持！！		
+ compileOptions {
+        sourceCompatibility 1.8
+        targetCompatibility 1.8
+    }	
 ```
 #### xml布局文件
 ```xml
