@@ -30,6 +30,13 @@ dependencies
         targetCompatibility 1.8
     }	
 ```
+#### 添加权限
+```xml
+<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+```
 #### xml布局文件
 ```xml
  <com.atech.glcamera.views.GLCameraView
