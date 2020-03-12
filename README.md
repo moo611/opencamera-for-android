@@ -13,7 +13,7 @@
 #### 
 # 使用
 #### 集成项目
-```
+```gradle
 allprojects {
     repositories {
         ...
@@ -22,7 +22,7 @@ allprojects {
 }
 dependencies 
         {
-	  implementation 'com.github.moo611:OpenCamera:1.0.4'
+	  implementation 'com.github.moo611:opencamera:1.0.4'
 	}
 ```
 #### xml布局文件
