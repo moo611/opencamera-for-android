@@ -6,11 +6,7 @@
 ![生成mp4](https://github.com/moo611/OpenCamera/blob/master/images/tu3.gif "生成mp4")
 
 # 功能
-#### 1.实时滤镜
-#### 2.拍照
-#### 3.录制短视频
-#### 4.美颜磨皮
-#### 
+#### opencamera是一套高性能的相机框架，基于opengles+glsurfaceview,能实现实时滤镜，拍照，录制短视频，美颜磨皮等功能。
 # 使用
 #### 集成项目
 ```gradle
