@@ -1,12 +1,10 @@
 # OpenCamera
-一款具有实时滤镜，美颜功能的相机。内置十几款滤镜，可实现拍照，录像功能。
+#### opencamera是一套高性能的相机框架，基于opengles+glsurfaceview,能实现实时滤镜，拍照，录制短视频，美颜磨皮等功能。
 
 # 效果图
 ![实时滤镜](https://github.com/moo611/OpenCamera/blob/master/images/tu1.jpg "实时滤镜")
 ![生成mp4](https://github.com/moo611/OpenCamera/blob/master/images/tu3.gif "生成mp4")
 
-# 功能
-#### opencamera是一套高性能的相机框架，基于opengles+glsurfaceview,能实现实时滤镜，拍照，录制短视频，美颜磨皮等功能。
 # 使用
 #### 集成项目
 ```gradle
