@@ -5,6 +5,9 @@
 ![实时滤镜](https://github.com/moo611/OpenCamera/blob/master/images/tu1.jpg "实时滤镜")
 ![生成mp4](https://github.com/moo611/OpenCamera/blob/master/images/tu3.gif "生成mp4")
 
+#### 版本号
+[![](https://www.jitpack.io/v/moo611/OpenCamera.svg)](https://www.jitpack.io/#moo611/OpenCamera)
+
 # 使用
 #### 集成项目
 ```gradle
@@ -16,7 +19,7 @@ allprojects {
 }
 dependencies 
         {
-	  implementation 'com.github.moo611:OpenCamera:1.0.5'
+	  implementation 'com.github.moo611:OpenCamera:latestversion'
 	}
 //注意在android代码块里添加java8支持！！		
  compileOptions {
