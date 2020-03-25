@@ -188,9 +188,8 @@ public class HWRecorderWrapper implements AudioRecorder.AudioRecordCallback {
                 mInputWindowSurface.setPresentationTime(timestamp);
                 mInputWindowSurface.swapBuffers();
             } catch (Exception e) {
-                //e.printStackTrace();
+                e.printStackTrace();
 
-                Log.v("aaaaa", e.getMessage());
             }
 
         });
