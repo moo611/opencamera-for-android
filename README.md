@@ -5,11 +5,14 @@
 ![实时滤镜](https://github.com/moo611/OpenCamera/blob/master/images/tu1.jpg "实时滤镜")
 ![生成mp4](https://github.com/moo611/OpenCamera/blob/master/images/tu3.gif "生成mp4")
 
+
+
+
+
+
+# 集成
 #### 版本号
 [![](https://www.jitpack.io/v/moo611/OpenCamera.svg)](https://www.jitpack.io/#moo611/OpenCamera)
-
-# 使用
-#### 集成项目
 ```gradle
 allprojects {
     repositories {
@@ -22,11 +25,24 @@ dependencies
 	  implementation 'com.github.moo611:OpenCamera:latestversion'
 	}
 //注意在android代码块里添加java8支持！！		
- compileOptions {
+ 	
+```
+#### 需要添加jdk 1.8支持
+```gradle
+compileOptions {
         sourceCompatibility 1.8
         targetCompatibility 1.8
-    }	
+    }
 ```
+
+#### 注意，由于demo里用的androidX,因此如果您的项目用的是v4或者v7包，会出现manifest不兼容的情况，有三种解决方案
+#### (1)升级您的应用到androidX
+#### (2)直接导入module的方式导入我的library
+#### (3)用1.0.4及以下版本(不建议)
+
+
+# 使用
+
 #### 添加权限
 ```xml
 <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
