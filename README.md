@@ -6,10 +6,6 @@
 ![生成mp4](https://github.com/moo611/OpenCamera/blob/master/images/tu3.gif "生成mp4")
 
 
-
-
-
-
 # 集成
 #### 版本号
 [![](https://www.jitpack.io/v/moo611/OpenCamera.svg)](https://www.jitpack.io/#moo611/OpenCamera)
