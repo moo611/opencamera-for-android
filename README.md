@@ -101,15 +101,23 @@ private List<FilterFactory.FilterType>filters = new ArrayList<>();
 
 #### 录制视频
 ```java
- private boolean mRecordingEnabled = false;  // 录制状态
+ private boolean isRecording = false;  // 录制状态
    ...
-       mRecordingEnabled = !mRecordingEnabled;
-       mCameraView.queueEvent(new Runnable() {
-           @Override public void run() {
-               // notify the renderer that we want to change the encoder's state
-               mCameraView.changeRecordingState(mRecordingEnabled);
-           }
-       });
+    
+       btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                
+		
+		isRecording = !isRecording;
+       
+                mCameraView.changeRecordingState(isRecording);
+		
+            }
+        });
+
+       
+         
 ```
 
 #### 设置视频保存路径及拍摄完成的回调
