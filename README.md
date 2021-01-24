@@ -5,8 +5,10 @@
 ![实时滤镜](https://github.com/moo611/OpenCamera/blob/master/images/tu1.jpg "实时滤镜")
 ![生成mp4](https://github.com/moo611/OpenCamera/blob/master/images/tu3.gif "生成mp4")
 
-# 使用
-#### 集成项目
+
+# 集成
+#### 版本号
+[![](https://www.jitpack.io/v/moo611/OpenCamera.svg)](https://www.jitpack.io/#moo611/OpenCamera)
 ```gradle
 allprojects {
     repositories {
@@ -16,14 +18,27 @@ allprojects {
 }
 dependencies 
         {
-	  implementation 'com.github.moo611:opencamera:1.0.5'
+	  implementation 'com.github.moo611:OpenCamera:latestversion'
 	}
 //注意在android代码块里添加java8支持！！		
- compileOptions {
+ 	
+```
+#### 需要添加jdk 1.8支持
+```gradle
+compileOptions {
         sourceCompatibility 1.8
         targetCompatibility 1.8
-    }	
+    }
 ```
+
+#### 注意，由于demo里用的androidX,因此如果您的项目用的是v4或者v7包，会出现manifest不兼容的情况，有三种解决方案
+#### (1)升级您的应用到androidX
+#### (2)直接导入module的方式导入我的library
+#### (3)用1.0.4及以下版本(不建议)
+
+
+# 使用
+
 #### 添加权限
 ```xml
 <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -86,15 +101,23 @@ private List<FilterFactory.FilterType>filters = new ArrayList<>();
 
 #### 录制视频
 ```java
- private boolean mRecordingEnabled = false;  // 录制状态
+ private boolean isRecording = false;  // 录制状态
    ...
-       mRecordingEnabled = !mRecordingEnabled;
-       mCameraView.queueEvent(new Runnable() {
-           @Override public void run() {
-               // notify the renderer that we want to change the encoder's state
-               mCameraView.changeRecordingState(mRecordingEnabled);
-           }
-       });
+    
+       btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                
+		
+		isRecording = !isRecording;
+       
+                mCameraView.changeRecordingState(isRecording);
+		
+            }
+        });
+
+       
+         
 ```
 
 #### 设置视频保存路径及拍摄完成的回调
