@@ -1,5 +1,6 @@
 package com.atech.glcamera.utils;
 
+import android.content.Context;
 import android.os.Environment;
 import android.util.Log;
 
@@ -19,10 +20,19 @@ public class FileUtils {
         }
 
 
-        return new File(dir.getPath() + File.separator + "img_" + System.currentTimeMillis() + ".mp4");
+        return new File(dir.getPath() + File.separator  + System.currentTimeMillis() + ".mp4");
 
     }
 
+
+    public static File createSystemVideoFile(Context c){
+
+        File dir = c.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+
+        return new File(dir,System.currentTimeMillis() + ".mp4");
+
+
+    }
 
     public static File createImageFile() {
 

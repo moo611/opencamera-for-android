@@ -7,7 +7,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -22,6 +21,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ThreadPoolExecutor;
 
 public class GLCameraActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -38,6 +38,8 @@ public class GLCameraActivity extends AppCompatActivity implements View.OnClickL
     private List<FilterInfo>infos = new ArrayList<>();
     private boolean isShowing = false;
 
+    private boolean isDone = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,6 +51,8 @@ public class GLCameraActivity extends AppCompatActivity implements View.OnClickL
         imgFilter = findViewById(R.id.img_filter);
         mCameraView = findViewById(R.id.glcamera);
         rv = findViewById(R.id.rv);
+
+
 
         imgMode.setOnClickListener(this);
         imgSwitch.setOnClickListener(this);
@@ -71,6 +75,9 @@ public class GLCameraActivity extends AppCompatActivity implements View.OnClickL
             }
         });
 
+
+
+
         mCameraView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -84,6 +91,23 @@ public class GLCameraActivity extends AppCompatActivity implements View.OnClickL
         });
 
         mCameraView.enableBeauty(true);
+        //set your own output file here
+        // mCameraView.setOuputMP4File();
+        //set record finish listener
+        mCameraView.setrecordFinishedListnener(new FileCallback() {
+            @Override
+            public void onData(File file) {
+
+                //update the gallery
+                sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE,
+                        Uri.fromFile(file)));
+
+            }
+        });
+
+
+
+
 
     }
 
@@ -131,19 +155,7 @@ public class GLCameraActivity extends AppCompatActivity implements View.OnClickL
         infos.add(new FilterInfo(R.drawable.filter_thumb_antique,"复古"));
         infos.add(new FilterInfo(R.drawable.filter_thumb_brannan,"Brannan"));
 
-        //set your own output file here
-       // mCameraView.setOuputMP4File();
-       //set record finish listener
-        mCameraView.setrecordFinishedListnener(new FileCallback() {
-            @Override
-            public void onData(File file) {
 
-                //update the gallery
-                sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE,
-                        Uri.fromFile(file)));
-
-            }
-        });
     }
 
     @Override

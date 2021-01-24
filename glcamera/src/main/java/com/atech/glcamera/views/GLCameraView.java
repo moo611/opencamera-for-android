@@ -7,6 +7,8 @@ import android.hardware.Camera;
 import android.opengl.EGL14;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
+import android.os.Build;
+import android.os.Environment;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.SurfaceHolder;
@@ -22,11 +24,13 @@ import com.atech.glcamera.utils.FilterFactory;
 
 import java.io.File;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.Semaphore;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
+
 
 public class GLCameraView extends GLSurfaceView {
 
@@ -50,6 +54,7 @@ public class GLCameraView extends GLSurfaceView {
     private static int STATE_ON = 1;
     private static int STATE_OFF = 2;
     private int state = 2;
+
 
     public GLCameraView(Context context) {
         super(context);
@@ -108,7 +113,12 @@ public class GLCameraView extends GLSurfaceView {
 
             this.surfaceView = surfaceView;
             hwRecorderWrapper = new HWRecorderWrapper(surfaceView.getContext());
-            mOutputFile = FileUtils.createVideoFile();
+
+
+            mOutputFile = FileUtils.createSystemVideoFile(c);
+
+
+            Log.v("outputvideo:",mOutputFile.getAbsolutePath());
 
             mRecordingEnabled = false;
             mCameraHelper = new CameraCore(surfaceView);
@@ -139,9 +149,8 @@ public class GLCameraView extends GLSurfaceView {
             mTextureId = BaseFilter.bindTexture();
             mSurfaceTexture = new SurfaceTexture(mTextureId);
             mSurfaceTexture.setOnFrameAvailableListener(this);
+
             mCameraHelper.startPreview(mSurfaceTexture);
-
-
         }
 
         /**
@@ -237,7 +246,6 @@ public class GLCameraView extends GLSurfaceView {
 
     public void takePicture(final FilteredBitmapCallback filteredBitmapCallback) {
 
-
         //获取当前的bitmap
 
         try {
@@ -283,6 +291,7 @@ public class GLCameraView extends GLSurfaceView {
             Log.v("aaaaa","updateFilter:"+Thread.currentThread());
 
         });
+
 
 
     }
@@ -357,5 +366,9 @@ public class GLCameraView extends GLSurfaceView {
         }
 
     }
+
+
+
+
 
 }

@@ -1,14 +1,16 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 30
+
     defaultConfig {
-        minSdkVersion 22
-        targetSdkVersion 28
+        minSdkVersion 19
+        targetSdkVersion 30
         versionCode 1
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
 
     }
 
@@ -26,8 +28,10 @@ android {
     externalNativeBuild {
         cmake {
             path file('./src/main/cpp/CMakeLists.txt')
+            version "3.10.2"
         }
     }
+    buildToolsVersion = '30.0.2'
 
 
 }
