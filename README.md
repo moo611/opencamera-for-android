@@ -1,23 +1,23 @@
 # OpenCamera
 #### opencamera是一套高性能的相机框架，基于opengles+glsurfaceview,能实现实时滤镜，拍照，录制短视频，美颜磨皮等功能。
 
-# 效果图
+## 效果图
 ![实时滤镜](https://github.com/moo611/OpenCamera/blob/master/images/tu1.jpg "实时滤镜")
 ![生成mp4](https://github.com/moo611/OpenCamera/blob/master/images/tu3.gif "生成mp4")
 
-# 已实现功能
-1.拍照
-2.录视频
-3.美颜，滤镜
+## 已实现功能
+1.拍照<br>
+2.录视频<br>
+3.美颜，滤镜<br>
 
-# 开发计划
-1.加入CameraX Api
-2.将glsurfaceview变成自定义的textureview渲染
-3.离线渲染
-4.将opengl java部分的代码变成可移植的c库，便于ios上的移植。
+## 开发计划
+1.加入CameraX Api<br>
+2.将glsurfaceview变成自定义的textureview渲染<br>
+3.离线渲染<br>
+4.将opengl java部分的代码变成可移植的c库，便于ios上的移植。<br>
 
 
-# 集成
+## 集成和使用
 #### 版本号
 [![](https://www.jitpack.io/v/moo611/OpenCamera.svg)](https://www.jitpack.io/#moo611/OpenCamera)
 ```gradle
@@ -47,8 +47,6 @@ compileOptions {
 #### (2)直接导入module的方式导入我的library
 #### (3)用1.0.4及以下版本(不建议)
 
-
-# 使用
 
 #### 添加权限
 ```xml
@@ -148,7 +146,7 @@ private List<FilterFactory.FilterType>filters = new ArrayList<>();
         });
 ```
 
-### 参考
+## 参考
 #### google/grafika 
 https://github.com/google/grafika
 #### android gpuimage
