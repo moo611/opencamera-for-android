@@ -5,6 +5,17 @@
 ![实时滤镜](https://github.com/moo611/OpenCamera/blob/master/images/tu1.jpg "实时滤镜")
 ![生成mp4](https://github.com/moo611/OpenCamera/blob/master/images/tu3.gif "生成mp4")
 
+# 已实现功能
+1.拍照
+2.录视频
+3.美颜，滤镜
+
+# 开发计划
+1.加入CameraX Api
+2.将glsurfaceview变成自定义的textureview渲染
+3.离线渲染
+4.将opengl java部分的代码变成可移植的c库，便于ios上的移植。
+
 
 # 集成
 #### 版本号
@@ -137,16 +148,7 @@ private List<FilterFactory.FilterType>filters = new ArrayList<>();
         });
 ```
 
-
-# 项目比较
-|       | 多种滤镜  | 拍照  | 录制视频  |  是否维护  |
-|------| ------------ | ------------ | ------------ | ------------ |
-|grafika|   X |X  |  √ | X |
-| gpuimage | √ | √ | X |X|
-|magiccamera| √  |  X | X  |X|
-|opencamera|  √ | √   | √   |√ |
-
-### 项目借鉴了不少前辈们的作品，喜欢的麻烦点个赞，谢谢。
+### 参考
 #### google/grafika 
 https://github.com/google/grafika
 #### android gpuimage
