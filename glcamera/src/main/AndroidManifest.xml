@@ -1,5 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.atech.glcamera" >
+    package="com.atech.glcamera">
 
     <uses-permission android:name="android.permission.CAMERA" />
+
+    <application>
+        <activity
+            android:theme="@style/CameraTheme"
+            android:name=".CameraActivity"
+            android:exported="false" />
+    </application>
+
 </manifest>
