@@ -94,6 +94,34 @@ GLuint GLUtils::CreateProgram(const char *pVertexShaderSource, const char *pFrag
     return program;
 }
 
+
+GLuint GLUtils::LoadTexture(uint8_t *data, int width, int height, int usedTexId) {
+
+    GLuint textures[1] ;
+    if (usedTexId == -1) {
+        glGenTextures(1, textures);
+        glBindTexture(GL_TEXTURE_2D, textures[0]);
+        glTexParameterf(GL_TEXTURE_2D,
+                GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameterf(GL_TEXTURE_2D,
+                GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameterf(GL_TEXTURE_2D,
+                GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameterf(GL_TEXTURE_2D,
+                GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height,
+                0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+    } else {
+        glBindTexture(GL_TEXTURE_2D, usedTexId);
+        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width,
+                height, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        textures[0] = usedTexId;
+    }
+    return textures[0];
+
+
+}
+
 void GLUtils::DeleteProgram(GLuint &program)
 {
     LOGCATE("GLUtils::DeleteProgram");

@@ -1,6 +1,5 @@
 package com.atech.glcamera.render;
 
-import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
@@ -9,14 +8,12 @@ import android.opengl.GLSurfaceView;
 import android.util.Log;
 import android.util.Size;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 
 import javax.microedition.khronos.egl.EGLConfig;
@@ -95,31 +92,7 @@ public class GLByteFlowRender extends ByteFlowRender implements GLSurfaceView.Re
         }
     }
 
-    public String readRawTextFile(Context context, int rawId) {
 
-        InputStream is = context.getResources().openRawResource(rawId);
-        BufferedReader br = new BufferedReader(new InputStreamReader(is));
-        String line;
-        StringBuilder sb = new StringBuilder();
-
-        try {
-            while ((line = br.readLine()) != null) {
-                sb.append(line);
-                sb.append("\n");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        try {
-            br.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return sb.toString();
-
-    }
 
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {

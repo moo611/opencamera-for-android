@@ -1,13 +1,12 @@
 package com.atech.glcamera;
 
 import static com.atech.glcamera.render.ByteFlowRender.IMAGE_FORMAT_I420;
-
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
+import static com.atech.glcamera.render.ByteFlowRender.IMAGE_FORMAT_RGBA;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.hardware.camera2.CameraCharacteristics;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
@@ -16,10 +15,18 @@ import android.util.Size;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+
 import com.atech.glcamera.camera.Camera2FrameCallback;
 import com.atech.glcamera.camera.Camera2Wrapper;
 import com.atech.glcamera.camera.CameraUtil;
 import com.atech.glcamera.render.GLByteFlowRender;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.ByteBuffer;
 
 public class CameraActivity extends AppCompatActivity implements Camera2FrameCallback {
     private static final String[] REQUEST_PERMISSIONS = {
@@ -34,6 +41,7 @@ public class CameraActivity extends AppCompatActivity implements Camera2FrameCal
     RelativeLayout rootView;
 
     private static final String TAG = "MainActivity";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,7 +55,7 @@ public class CameraActivity extends AppCompatActivity implements Camera2FrameCal
         rootView.addView(mGLSurfaceView, p);
         mByteFlowRender = new GLByteFlowRender();
         mByteFlowRender.init(mGLSurfaceView);
-        mByteFlowRender.readRawTextFile(this, com.atech.glcamera.R.raw.base_fragment_shader);
+        mByteFlowRender.loadShaderFromAssetsFile(0, getResources());
         //注意先执行render后初始化相机
         mCamera2Wrapper = new Camera2Wrapper(this);
     }
@@ -126,9 +134,6 @@ public class CameraActivity extends AppCompatActivity implements Camera2FrameCal
     }
 
 
-
-
-
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
 
@@ -152,6 +157,30 @@ public class CameraActivity extends AppCompatActivity implements Camera2FrameCal
 
         mByteFlowRender.setRenderFrame(IMAGE_FORMAT_I420, data, width, height);
         mByteFlowRender.requestRender();
+
+    }
+
+    private Bitmap loadRGBAImage(int resId) {
+        InputStream is = this.getResources().openRawResource(resId);
+        Bitmap bitmap;
+        try {
+            bitmap = BitmapFactory.decodeStream(is);
+            if (bitmap != null) {
+                int bytes = bitmap.getByteCount();
+                ByteBuffer buf = ByteBuffer.allocate(bytes);
+                bitmap.copyPixelsToBuffer(buf);
+                byte[] byteArray = buf.array();
+                mByteFlowRender.setRenderFrame(IMAGE_FORMAT_RGBA, byteArray, bitmap.getWidth(), bitmap.getHeight());
+                mByteFlowRender.requestRender();
+            }
+        } finally {
+            try {
+                is.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return bitmap;
     }
 
     @Override
