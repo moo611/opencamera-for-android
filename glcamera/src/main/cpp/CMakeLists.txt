@@ -1,17 +1,32 @@
-cmake_minimum_required(VERSION 3.10.2)
+cmake_minimum_required(VERSION 3.4.1)
 
 
-set(distribution_DIR ../../../../libs)
 
-add_library( # Sets the name of the library.
-        yuv-decoder
+include_directories(
+        ${CMAKE_SOURCE_DIR}/util
+        ${CMAKE_SOURCE_DIR}/render
+        ${CMAKE_SOURCE_DIR}/glm
+        ${CMAKE_SOURCE_DIR}/context
+        ${CMAKE_SOURCE_DIR}/filter
+)
 
+file(GLOB src-files
+        ${CMAKE_SOURCE_DIR}/JniImpl.cpp
+        ${CMAKE_SOURCE_DIR}/render/*.cpp
+        ${CMAKE_SOURCE_DIR}/context/RenderContext.cpp
+#        ${CMAKE_SOURCE_DIR}/filter/*.cpp
+        ${CMAKE_SOURCE_DIR}/util/*.cpp
+        )
+
+add_library(
+
+        opencamera-android
         # Sets the library as a shared library.
         SHARED
 
         # Provides a relative path to your source file(s).
-        yuv-decoder.c)
-
+        ${src-files}
+)
 
 
 find_library( # Sets the name of the path variable.
@@ -22,12 +37,12 @@ find_library( # Sets the name of the path variable.
         log)
 
 
-
 target_link_libraries( # Specifies the target library.
-        yuv-decoder
+        opencamera-android
 
         # Links the target library to the log library
         # included in the NDK.
         ${log-lib}
-        GLESv2
-        jnigraphics)
+        EGL
+        GLESv3
+        android)
