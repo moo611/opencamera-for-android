@@ -242,7 +242,7 @@ public class CameraActivity extends AppCompatActivity implements Camera2FrameCal
 
     @Override
     public void onPreviewFrame(byte[] data, int width, int height) {
-
+        Log.v(TAG,width+"&"+height);
         mByteFlowRender.setRenderFrame(IMAGE_FORMAT_I420, data, width, height);
         mByteFlowRender.requestRender();
 
