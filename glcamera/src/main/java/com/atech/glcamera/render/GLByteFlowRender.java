@@ -114,7 +114,8 @@ public class GLByteFlowRender extends ByteFlowRender implements GLSurfaceView.Re
         native_OnDrawFrame();
 
         if (mReadPixels) {
-            saveToLocal(createBitmapFromGLSurface(0, 0, mCurrentImgSize.getWidth(), mCurrentImgSize.getHeight()), mImagePath);
+            Bitmap bitmap = createBitmapFromGLSurface(0, 0, mCurrentImgSize.getWidth(), mCurrentImgSize.getHeight());
+            saveToLocal(bitmap, mImagePath);
             mReadPixels = false;
         }
     }

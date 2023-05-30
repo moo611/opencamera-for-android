@@ -1,11 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+<FrameLayout xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/root_view"
-    tools:context=".CameraActivity">
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
 
-</RelativeLayout>
+    <RelativeLayout
+        android:id="@+id/root_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".CameraActivity">
+
+
+    </RelativeLayout>
+
+
+    <TextView
+        android:layout_gravity="end"
+        android:background="#e3e3e3"
+        android:id="@+id/tv_filter"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:layout_width="wrap_content"
+        android:paddingBottom="3dp"
+        android:paddingLeft="15dp"
+        android:paddingRight="15dp"
+        android:paddingTop="3dp"
+        android:text="滤镜"
+        android:textColor="#333333"
+        android:textSize="16sp" />
+
+    <FrameLayout
+        android:layout_gravity="center_horizontal|bottom"
+        android:background="@drawable/bg_camera"
+        android:id="@+id/fl_camera"
+        android:layout_height="60dp"
+        android:layout_marginBottom="50dp"
+        android:layout_width="60dp">
+
+        <ImageView
+            android:id="@+id/img_camera"
+            android:layout_gravity="center"
+            android:layout_height="40dp"
+            android:layout_width="40dp"
+            android:src="@drawable/camera" />
+    </FrameLayout>
+
+</FrameLayout>
